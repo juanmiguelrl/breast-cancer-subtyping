@@ -1,0 +1,34 @@
+{
+    "downscale": {
+        "manifest_path" : "D:/Escritorio/tfg/test/manifest.txt",
+        "svsdirectory" : "D:/Escritorio/tfg/test/svs",
+        "outputDirectory" : "D:/Escritorio/tfg/test/downscale",
+        "scale" : 32
+    },
+    "store": {
+        "destination_path" : "D:/Escritorio/tfg/test/images_together",
+        "input_dir" : "D:/Escritorio/tfg/test/downscale/*/*"
+
+    },
+    "filter" : {
+        "input_dir" : "D:\\Escritorio\\tfg\\test\\images_together\\*",
+        "destination_path" : "D:\\Escritorio\\tfg/test\\images_together_filtered",
+        "prefix" : "D:\\Escritorio\\tfg\\test\\images_together",
+        "resize_size" : 224
+    },
+    "clasify" : {
+        "input" : "D:/Escritorio/tfg/test/slide_stage_relation.csv",
+        "imgdir" : "D:/Escritorio/tfg/test/crop_resize_images32",
+        "sourceDir" : "D:/Escritorio/tfg/test/crop_resize_images32/",
+        "newDirTOsplitImages" : "D:/Escritorio/tfg/test/images_together_filtered_classified"
+    },
+    "ann" : {
+        "inputDir" : "D:/Escritorio/tfg/test/images_together_filtered_classified",
+        "trainDir" : "D:/Escritorio/tfg/test/images_together_filtered_classified/train",
+        "testDir" : "D:/Escritorio/tfg/test/images_together_filtered_classified/test",
+        "logdir" : "D:\\Escritorio\\tfg\\test\\logs\\",
+        "batch_size" : 32,
+        "epochs" : 10,
+        "n_gpus" : 1
+    }
+}

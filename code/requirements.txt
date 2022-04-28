@@ -1,0 +1,8 @@
+fsspec
+pandas
+
+
+#ann.py
+tensorflow
+pillow
+scipy
