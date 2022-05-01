@@ -8,6 +8,14 @@ import os
 import datetime
 import argparse
 from tensorflow.python.client import device_lib
+from pathlib import Path
+import numpy as np
+import matplotlib.pyplot as plt
+import itertools
+import io
+from tensorflow import keras
+import sklearn.metrics
+from tensorflow.keras.applications.vgg16 import decode_predictions
 
 
 def train_ann(inputDir, trainDir, valDir, logdir, batch_size, epochs, n_gpus):
@@ -99,9 +107,109 @@ def train_ann(inputDir, trainDir, valDir, logdir, batch_size, epochs, n_gpus):
   #print(steps_per_epoch)
   #print(validation_steps)
 
+##########################################################
+
+
+  def plot_confusion_matrix(cm, class_names):
+      """
+      Returns a matplotlib figure containing the plotted confusion matrix.
+
+      Args:
+        cm (array, shape = [n, n]): a confusion matrix of integer classes
+        class_names (array, shape = [n]): String names of the integer classes
+      """
+      figure = plt.figure(figsize=(8, 8))
+      plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+      plt.title("Confusion matrix")
+      plt.colorbar()
+      tick_marks = np.arange(len(class_names))
+      plt.xticks(tick_marks, class_names, rotation=45)
+      plt.yticks(tick_marks, class_names)
+
+      # Compute the labels from the normalized confusion matrix.
+      labels = np.around(cm.astype('float') / cm.sum(axis=1)[:, np.newaxis], decimals=2)
+
+      # Use white text if squares are dark; otherwise black.
+      threshold = cm.max() / 2.
+      for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+          color = "white" if cm[i, j] > threshold else "black"
+          plt.text(j, i, labels[i, j], horizontalalignment="center", color=color)
+
+      plt.tight_layout()
+      plt.ylabel('True label')
+      plt.xlabel('Predicted label')
+      return figure
+  #logging
 
   #log_dir = logdir + datetime.datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
-  #tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+  log_dir = os.path.join(logdir,datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S"))
+  #pass log_dir to path to normalize slashes
+  #path_dir = Path((os.path.join(log_dir)))
+  #log_dir = str(path_dir)
+  tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+
+
+  # Creates a file writer for the log directory.
+  file_writer = tf.summary.create_file_writer(log_dir)
+  #file_writer_cm = tf.summary.create_file_writer(log_dir + '/cm')
+
+  # Using the file writer, log the reshaped image.
+  # with file_writer.as_default():
+  #     # Don't forget to reshape.
+  #     images = np.reshape(train_datagen[0:25], (-1, 28, 28, 1))
+  #     tf.summary.image("25 training data examples", images, max_outputs=25, step=0)
+  def plot_to_image(figure):
+      """Converts the matplotlib plot specified by 'figure' to a PNG image and
+      returns it. The supplied figure is closed and inaccessible after this call."""
+      # Save the plot to a PNG in memory.
+      buf = io.BytesIO()
+      plt.savefig(buf, format='png')
+      # Closing the figure prevents it from being displayed directly inside
+      # the notebook.
+      plt.close(figure)
+      buf.seek(0)
+      # Convert PNG buffer to TF image
+      image = tf.image.decode_png(buf.getvalue(), channels=4)
+      # Add the batch dimension
+      image = tf.expand_dims(image, 0)
+      return image
+
+  def log_confusion_matrix(epoch, logs):
+      # Use the model to predict the values from the validation dataset.
+      test_pred_raw = modelFE.predict(validation_generator)
+      test_pred = np.argmax(test_pred_raw, axis=1)
+      class_labels = list(validation_generator.class_indices.keys())
+
+      ###########################
+      results = decode_predictions(test_pred_raw)
+      for result in results[0]:
+          print(result[2])  # prints the accuracy levels of each class
+      ###########################
+
+      # Calculate the confusion matrix.
+      cm = sklearn.metrics.confusion_matrix(validation_generator.classes, test_pred)
+      # Log the confusion matrix as an image summary.
+      figure = plot_confusion_matrix(cm, class_names=class_labels)
+      cm_image = plot_to_image(figure)
+
+      # Log the confusion matrix as an image summary.
+      with file_writer.as_default():
+          tf.summary.image("Confusion Matrix", cm_image, step=epoch)
+
+  # Define the per-epoch callback.
+  cm_callback = keras.callbacks.LambdaCallback(on_epoch_end=log_confusion_matrix)
+
+
+
+
+  ##############################################
+  # ''' confusion matrix summaries '''
+  # img_d_summary_dir = os.path.join(checkpoint_dir, "summaries", "img")
+  # img_d_summary_writer = tf.summary.FileWriter(img_d_summary_dir, sess.graph)
+  # img_d_summary = plot_confusion_matrix(correct_labels, predict_labels, labels, tensor_name='dev/cm')
+  # img_d_summary_writer.add_summary(img_d_summary, current_step)
+
+  ##############################################
 
 
   historyFE = modelFE.fit(
@@ -109,8 +217,8 @@ def train_ann(inputDir, trainDir, valDir, logdir, batch_size, epochs, n_gpus):
       validation_data = validation_generator,
       steps_per_epoch = steps_per_epoch,
       epochs = epochs,
-      validation_steps = validation_steps#,
-      #callbacks=[tensorboard_callback]
+      validation_steps = validation_steps,
+      callbacks=[tensorboard_callback,cm_callback]
   )
 
 

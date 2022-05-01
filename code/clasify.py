@@ -4,13 +4,6 @@ import numpy as np #para numeros
 import pandas as pd #para matrices
 from sklearn.impute import SimpleImputer #para missing
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder #para codificar categoricos
-from sklearn.model_selection import train_test_split,StratifiedKFold #para dividir los datos
-from sklearn.preprocessing import MinMaxScaler #para escalar (estandarizar)
-from keras.models import Sequential
-from keras.layers import Dense, Dropout
-from keras.wrappers.scikit_learn import KerasClassifier
-from sklearn.model_selection import cross_val_score, KFold
-from matplotlib import pyplot as plt
 from keras.utils import np_utils
 
 
