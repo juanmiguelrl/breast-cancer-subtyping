@@ -29,6 +29,15 @@
         "logdir" : "D:/Escritorio/tfg/test/logs/",
         "batch_size" : 32,
         "epochs" : 1,
-        "n_gpus" : 1
+        "n_gpus" : 1,
+        "model_dir" : "D:/Escritorio/tfg/test/models/"
+    },
+    "eval": {
+        "testDir" : "D:/Escritorio/tfg/test/images_together_filtered_classified/test",
+        "model_dir" : "D:/Escritorio/tfg/test/models/",
+        "logdir" : "D:/Escritorio/tfg/test/logs/",
+        "batch_size" : 32,
+        "n_gpus" : 1,
+        "epochs" : 1
     }
 }

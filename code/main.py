@@ -1,5 +1,5 @@
 import argparse
-import image_preprocess, store_images, filters, clasify, ann
+import image_preprocess, store_images, filters, clasify, ann2, eval
 import json
 
 
@@ -19,6 +19,7 @@ if __name__ == '__main__':
     parser.add_argument("--c", help="clasify the images and split them in train and test sets", required=False,
                         default=False, action="store_true")
     parser.add_argument("--t", help="trains the network", required=False, default=False, action="store_true")
+    parser.add_argument("--e", help="evaluate the model", required=False, default=False, action="store_true")
     parser.add_argument("--j", help="json file with the variables", required=True)
 
     args = parser.parse_args()
@@ -40,4 +41,7 @@ if __name__ == '__main__':
         clasify.clasify_images(PARAMS["clasify"]["input"], PARAMS["clasify"]["imgdir"], PARAMS["clasify"]["sourceDir"], PARAMS["clasify"]["newDirTOsplitImages"])
     if args.t:
         print("training network...")
-        ann.train_ann(PARAMS["ann"]["inputDir"], PARAMS["ann"]["trainDir"], PARAMS["ann"]["testDir"], PARAMS["ann"]["logdir"], PARAMS["ann"]["batch_size"], PARAMS["ann"]["epochs"], PARAMS["ann"]["n_gpus"])
+        ann2.train_ann(PARAMS["ann"]["trainDir"], PARAMS["ann"]["testDir"], PARAMS["ann"]["logdir"], PARAMS["ann"]["batch_size"], PARAMS["ann"]["epochs"], PARAMS["ann"]["n_gpus"], PARAMS["ann"]["model_dir"])
+    if args.e:
+        print("evaluating network...")
+        eval.evaluate_ann(PARAMS["eval"]["model_dir"],PARAMS["eval"]["testDir"],PARAMS["eval"]["batch_size"])

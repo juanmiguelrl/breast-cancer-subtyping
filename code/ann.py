@@ -18,7 +18,7 @@ import sklearn.metrics
 from tensorflow.keras.applications.vgg16 import decode_predictions
 
 
-def train_ann(inputDir, trainDir, valDir, logdir, batch_size, epochs, n_gpus):
+def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus):
   print(tf.config.list_physical_devices())
 
   print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
