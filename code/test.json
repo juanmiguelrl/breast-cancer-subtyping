@@ -27,8 +27,8 @@
         "trainDir" : "D:/Escritorio/tfg/test/images_together_filtered_classified/train",
         "testDir" : "D:/Escritorio/tfg/test/images_together_filtered_classified/test",
         "batch_size" : 32,
-        "epochs" : 1,
-        "n_gpus" : 1,
+        "epochs" : 3,
+        "n_gpus" : 1
     },
     "eval": {
         "logdir" : "D:/Escritorio/tfg/test/logs/",
