@@ -9,7 +9,7 @@ from packaging import version
 
 import tensorflow as tf
 from tensorflow import keras
-
+from tensorflow.keras.applications import VGG16
 import matplotlib.pyplot as plt
 import numpy as np
 import sklearn.metrics
@@ -117,25 +117,68 @@ def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,lo
     #
     # plt.show()
 
-    num_classes = 4
 
-    model = tf.keras.Sequential([
-      tf.keras.layers.Rescaling(1./255),
-      tf.keras.layers.Conv2D(32, 3, activation='relu'),
-      tf.keras.layers.MaxPooling2D(),
-      tf.keras.layers.Conv2D(32, 3, activation='relu'),
-      tf.keras.layers.MaxPooling2D(),
-      tf.keras.layers.Conv2D(32, 3, activation='relu'),
-      tf.keras.layers.MaxPooling2D(),
-      tf.keras.layers.Flatten(),
-      tf.keras.layers.Dense(128, activation='relu'),
-      tf.keras.layers.Dense(num_classes)
+
+#################################
+
+    # Load VGG16 trained params and CNN network
+    pre_trained_model = VGG16(input_shape= (224, 224, 3),
+                              include_top = False,
+                              weights = 'imagenet')
+    pre_trained_model.trainable = True
+    set_trainable = False
+
+    for layer in pre_trained_model.layers:
+      if layer.name == 'block5_conv1':
+        set_trainable = True
+      if set_trainable:
+        layer.trainable = True
+      else:
+        layer.trainable = False
+
+    pre_trained_model.summary()
+
+    #2 full conected layers to be trained are added to the model
+    model = tf.keras.models.Sequential([pre_trained_model,
+                                          tf.keras.layers.Flatten(),
+                                          tf.keras.layers.Dense(256, activation = 'relu'),
+                                          tf.keras.layers.Dense(4, activation = 'softmax')
     ])
+    model.summary()
 
-    model.compile(
-        optimizer='adam',
-        loss=tf.losses.SparseCategoricalCrossentropy(from_logits=True),
-        metrics=['accuracy'])
+    # Compile the model
+    model.compile(loss='sparse_categorical_crossentropy',
+                    optimizer=tf.keras.optimizers.RMSprop(lr=1e-4),
+                    metrics=['acc'])
+
+    # model = keras.Sequential([
+    #     keras.layers.Flatten(input_shape=(224, 224, 3)),
+    #     keras.layers.Dense(128, activation='relu'),
+    #     keras.layers.Dense(4, activation='softmax')
+    # ])
+    # model.compile(optimizer='adam',
+    #               loss='sparse_categorical_crossentropy',
+    #               metrics=['accuracy'])
+#################################
+    # num_classes = 4
+    #
+    # model = tf.keras.Sequential([
+    #   tf.keras.layers.Rescaling(1./255),
+    #   tf.keras.layers.Conv2D(32, 3, activation='relu'),
+    #   tf.keras.layers.MaxPooling2D(),
+    #   tf.keras.layers.Conv2D(32, 3, activation='relu'),
+    #   tf.keras.layers.MaxPooling2D(),
+    #   tf.keras.layers.Conv2D(32, 3, activation='relu'),
+    #   tf.keras.layers.MaxPooling2D(),
+    #   tf.keras.layers.Flatten(),
+    #   tf.keras.layers.Dense(128, activation='relu'),
+    #   tf.keras.layers.Dense(num_classes)
+    # ])
+
+    # model.compile(
+    #     optimizer='adam',
+    #     loss=tf.losses.SparseCategoricalCrossentropy(from_logits=True),
+    #     metrics=['accuracy'])
 
 ########################################
     #logging
@@ -156,13 +199,13 @@ def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,lo
         horizontal_flip=True,
         fill_mode='nearest'
     )
-    train_generator = train_datagen.flow_from_directory(trainDir,
+    train_generator = validation_datagen.flow_from_directory(trainDir,
                                                         batch_size=batch_size,
                                                         class_mode='binary',
-                                                        target_size=(200, 200))
+                                                        target_size=(224, 224))
     validation_generator = validation_datagen.flow_from_directory(valDir, batch_size=batch_size,
                                                                   class_mode='binary',
-                                                                  target_size=(200, 200))
+                                                                  target_size=(224, 224))
     ###################
     ###################
     def log_confusion_matrix(epoch, logs):
