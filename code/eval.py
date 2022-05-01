@@ -5,7 +5,7 @@ import itertools
 import numpy as np
 import sklearn.metrics
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-
+from datetime import datetime
 
 def plot_confusion_matrix(cm, class_names):
     """
@@ -37,7 +37,7 @@ def plot_confusion_matrix(cm, class_names):
     plt.xlabel('Predicted label')
     return figure
 
-def evaluate_ann(model_dir,valDir,batch_size):
+def evaluate_ann(logdir,model_dir,valDir,batch_size,log_dir=None):
     model = tf.keras.models.load_model(model_dir + "model")
     def plot_confusion_matrix(cm, class_names):
         """
@@ -97,6 +97,8 @@ def evaluate_ann(model_dir,valDir,batch_size):
     plt.show()
 
 
+    # Creates a file writer for the log directory.
+    file_writer = tf.summary.create_file_writer(log_dir)
 
     # cm = tf.math.confusion_matrix([0,1,2,3] , np.argmax(model.predict(val_ds)))
     # print(cm)

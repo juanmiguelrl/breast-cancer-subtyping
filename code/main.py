@@ -1,7 +1,7 @@
 import argparse
 import image_preprocess, store_images, filters, clasify, ann2, eval
 import json
-
+from datetime import datetime
 
 def json_params(json_file):
     with open(json_file) as f:
@@ -39,9 +39,13 @@ if __name__ == '__main__':
     if args.c:
         print("clasifying images...")
         clasify.clasify_images(PARAMS["clasify"]["input"], PARAMS["clasify"]["imgdir"], PARAMS["clasify"]["sourceDir"], PARAMS["clasify"]["newDirTOsplitImages"])
+
+    if args.t or args.e:
+        # Sets up a timestamped log directory.
+        log_dir = PARAMS["logdir"] + datetime.now().strftime("%Y%m%d-%H%M%S")
     if args.t:
         print("training network...")
-        ann2.train_ann(PARAMS["ann"]["trainDir"], PARAMS["ann"]["testDir"], PARAMS["ann"]["logdir"], PARAMS["ann"]["batch_size"], PARAMS["ann"]["epochs"], PARAMS["ann"]["n_gpus"], PARAMS["ann"]["model_dir"])
+        ann2.train_ann(PARAMS["ann"]["trainDir"], PARAMS["ann"]["testDir"], PARAMS["logdir"], PARAMS["ann"]["batch_size"], PARAMS["ann"]["epochs"], PARAMS["ann"]["n_gpus"], PARAMS["model_dir"],log_dir)
     if args.e:
         print("evaluating network...")
-        eval.evaluate_ann(PARAMS["eval"]["model_dir"],PARAMS["eval"]["testDir"],PARAMS["eval"]["batch_size"])
+        eval.evaluate_ann(PARAMS["logdir"],PARAMS["model_dir"],PARAMS["eval"]["testDir"],PARAMS["eval"]["batch_size"],log_dir)

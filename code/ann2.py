@@ -16,7 +16,7 @@ import sklearn.metrics
 
 
 
-def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir):
+def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,log_dir=None):
     from tensorflow.python.client import device_lib
     print(tf.config.list_physical_devices())
 
@@ -61,11 +61,13 @@ def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir):
         (train_ds,train_ds.class_names), (val_ds,val_ds.class_names)
 
 
-    # # Sets up a timestamped log directory.
-    # logdir = logdir + "imgs/" + datetime.now().strftime("%Y%m%d-%H%M%S")
-    # # Creates a file writer for the log directory.
-    # file_writer = tf.summary.create_file_writer(logdir)
-    #
+    # Sets up a timestamped log directory.
+    if log_dir is None:
+        log_dir = logdir + "imgs/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+
+    # Creates a file writer for the log directory.
+    file_writer = tf.summary.create_file_writer(log_dir)
+
     #
     # #get images from dataset and store them in an array
     # for images, labels in train_ds.take(1):
