@@ -14,6 +14,7 @@ Program options:
 --f : filters the images, crops them to take only one tissue sample and rescales them to the desired size  
 --c : clasifies the images and slits them in train and test sets  
 --t : this option os to execute the training of the neural network  
+--e : to evaluate the model indicated with the dataset indicated  
 (These next options are necessary for the training option):  
 --epochs : to indicate the number of epochs that will be done at the training  
 --batch _size: to indicate the batch size at the training  
