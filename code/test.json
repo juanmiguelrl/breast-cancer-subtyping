@@ -3,7 +3,8 @@
         "manifest_path" : "D:/Escritorio/tfg/test/manifest.txt",
         "svsdirectory" : "D:/Escritorio/tfg/test/svs",
         "outputDirectory" : "D:/Escritorio/tfg/test/downscale",
-        "scale" : 32
+        "scale" : 32,
+        "windows" : true
     },
     "store": {
         "destination_path" : "D:/Escritorio/tfg/test/images_together",

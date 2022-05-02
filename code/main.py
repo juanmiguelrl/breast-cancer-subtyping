@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     if args.d:
         print("dowsncaling...")
-        image_preprocess.downscale_from_manifest(PARAMS["downscale"]["manifest_path"], PARAMS["downscale"]["svsdirectory"], PARAMS["downscale"]["outputDirectory"], PARAMS["downscale"]["scale"])
+        image_preprocess.downscale_from_manifest(PARAMS["downscale"]["manifest_path"], PARAMS["downscale"]["svsdirectory"], PARAMS["downscale"]["outputDirectory"], PARAMS["downscale"]["scale"],PARAMS["downscale"]["windows"])
     if args.s:
         print("resizing, cropping and storing images together...")
         store_images.store_images_together(PARAMS["store"]["destination_path"], PARAMS["store"]["input_dir"])
