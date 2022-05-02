@@ -48,4 +48,4 @@ if __name__ == '__main__':
         ann2.train_ann(PARAMS["ann"]["trainDir"], PARAMS["ann"]["testDir"], PARAMS["logdir"], PARAMS["ann"]["batch_size"], PARAMS["ann"]["epochs"], PARAMS["ann"]["n_gpus"], PARAMS["model_dir"],log_dir)
     if args.e:
         print("evaluating network...")
-        eval.evaluate_ann(PARAMS["logdir"],PARAMS["model_dir"],PARAMS["eval"]["testDir"],PARAMS["eval"]["batch_size"],log_dir)
+        eval.evaluate_ann(PARAMS["model_dir"],PARAMS["eval"]["testDir"],PARAMS["eval"]["batch_size"],log_dir)

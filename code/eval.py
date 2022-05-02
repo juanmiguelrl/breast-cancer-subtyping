@@ -55,7 +55,7 @@ def plot_confusion_matrix(cm, class_names):
     plt.xlabel('Predicted label')
     return figure
 
-def evaluate_ann(logdir,model_dir,valDir,batch_size,log_dir=None):
+def evaluate_ann(model_dir,valDir,batch_size,log_dir=None):
     model = tf.keras.models.load_model(model_dir + "model")
 
 

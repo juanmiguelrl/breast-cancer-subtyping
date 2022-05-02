@@ -158,7 +158,7 @@ def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,lo
 
         # Compile the model
         model.compile(loss='sparse_categorical_crossentropy',
-                        optimizer=tf.keras.optimizers.RMSprop(lr=1e-4),
+                        oplogdirtimizer=tf.keras.optimizers.RMSprop(lr=1e-4),
                         metrics=['acc'])
 
         # model = keras.Sequential([
