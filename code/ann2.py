@@ -120,65 +120,75 @@ def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,lo
 
 
 #################################
+    # for the use of multigpu
+    device_type = 'GPU'
+    devices = tf.config.experimental.list_physical_devices(
+        device_type)
+    devices_names = [d.name.split("e:")[1] for d in devices]
 
-    # Load VGG16 trained params and CNN network
-    pre_trained_model = VGG16(input_shape= (224, 224, 3),
-                              include_top = False,
-                              weights = 'imagenet')
-    pre_trained_model.trainable = True
-    set_trainable = False
+    strategy = tf.distribute.MirroredStrategy(
+        devices=devices_names[:n_gpus])
 
-    for layer in pre_trained_model.layers:
-      if layer.name == 'block5_conv1':
-        set_trainable = True
-      if set_trainable:
-        layer.trainable = True
-      else:
-        layer.trainable = False
+    with strategy.scope():
 
-    pre_trained_model.summary()
+        # Load VGG16 trained params and CNN network
+        pre_trained_model = VGG16(input_shape= (224, 224, 3),
+                                  include_top = False,
+                                  weights = 'imagenet')
+        pre_trained_model.trainable = True
+        set_trainable = False
 
-    #2 full conected layers to be trained are added to the model
-    model = tf.keras.models.Sequential([pre_trained_model,
-                                          tf.keras.layers.Flatten(),
-                                          tf.keras.layers.Dense(256, activation = 'relu'),
-                                          tf.keras.layers.Dense(4, activation = 'softmax')
-    ])
-    model.summary()
+        for layer in pre_trained_model.layers:
+          if layer.name == 'block5_conv1':
+            set_trainable = True
+          if set_trainable:
+            layer.trainable = True
+          else:
+            layer.trainable = False
 
-    # Compile the model
-    model.compile(loss='sparse_categorical_crossentropy',
-                    optimizer=tf.keras.optimizers.RMSprop(lr=1e-4),
-                    metrics=['acc'])
+        pre_trained_model.summary()
 
-    # model = keras.Sequential([
-    #     keras.layers.Flatten(input_shape=(224, 224, 3)),
-    #     keras.layers.Dense(128, activation='relu'),
-    #     keras.layers.Dense(4, activation='softmax')
-    # ])
-    # model.compile(optimizer='adam',
-    #               loss='sparse_categorical_crossentropy',
-    #               metrics=['accuracy'])
-#################################
-    # num_classes = 4
-    #
-    # model = tf.keras.Sequential([
-    #   tf.keras.layers.Rescaling(1./255),
-    #   tf.keras.layers.Conv2D(32, 3, activation='relu'),
-    #   tf.keras.layers.MaxPooling2D(),
-    #   tf.keras.layers.Conv2D(32, 3, activation='relu'),
-    #   tf.keras.layers.MaxPooling2D(),
-    #   tf.keras.layers.Conv2D(32, 3, activation='relu'),
-    #   tf.keras.layers.MaxPooling2D(),
-    #   tf.keras.layers.Flatten(),
-    #   tf.keras.layers.Dense(128, activation='relu'),
-    #   tf.keras.layers.Dense(num_classes)
-    # ])
+        #2 full conected layers to be trained are added to the model
+        model = tf.keras.models.Sequential([pre_trained_model,
+                                              tf.keras.layers.Flatten(),
+                                              tf.keras.layers.Dense(256, activation = 'relu'),
+                                              tf.keras.layers.Dense(4, activation = 'softmax')
+        ])
+        model.summary()
 
-    # model.compile(
-    #     optimizer='adam',
-    #     loss=tf.losses.SparseCategoricalCrossentropy(from_logits=True),
-    #     metrics=['accuracy'])
+        # Compile the model
+        model.compile(loss='sparse_categorical_crossentropy',
+                        optimizer=tf.keras.optimizers.RMSprop(lr=1e-4),
+                        metrics=['acc'])
+
+        # model = keras.Sequential([
+        #     keras.layers.Flatten(input_shape=(224, 224, 3)),
+        #     keras.layers.Dense(128, activation='relu'),
+        #     keras.layers.Dense(4, activation='softmax')
+        # ])
+        # model.compile(optimizer='adam',
+        #               loss='sparse_categorical_crossentropy',
+        #               metrics=['accuracy'])
+    #################################
+        # num_classes = 4
+        #
+        # model = tf.keras.Sequential([
+        #   tf.keras.layers.Rescaling(1./255),
+        #   tf.keras.layers.Conv2D(32, 3, activation='relu'),
+        #   tf.keras.layers.MaxPooling2D(),
+        #   tf.keras.layers.Conv2D(32, 3, activation='relu'),
+        #   tf.keras.layers.MaxPooling2D(),
+        #   tf.keras.layers.Conv2D(32, 3, activation='relu'),
+        #   tf.keras.layers.MaxPooling2D(),
+        #   tf.keras.layers.Flatten(),
+        #   tf.keras.layers.Dense(128, activation='relu'),
+        #   tf.keras.layers.Dense(num_classes)
+        # ])
+
+        # model.compile(
+        #     optimizer='adam',
+        #     loss=tf.losses.SparseCategoricalCrossentropy(from_logits=True),
+        #     metrics=['accuracy'])
 
 ########################################
     #logging
