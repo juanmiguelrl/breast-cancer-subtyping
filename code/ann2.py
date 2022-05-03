@@ -47,9 +47,9 @@ def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,
             devices=devices_names[:n_gpus])
 
         with strategy.scope():
-            model = VGG16_model(learning_rate,n_classes)
+            model = VGG16_model(learning_rate,n_classes,10)
     else:
-        model = VGG16_model(learning_rate,n_classes)
+        model = VGG16_model(learning_rate,n_classes,10)
 
 ########################################
     #logging
