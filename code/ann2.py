@@ -1,17 +1,8 @@
-import tensorflow as tf
-import tensorflow_datasets as tfds
-from tensorflow.python.client import device_lib
 from model import VGG16_model
-
-from datetime import datetime
-import io
-import itertools
-from packaging import version
 
 import tensorflow as tf
 from tensorflow import keras
 
-import matplotlib.pyplot as plt
 import numpy as np
 import sklearn.metrics
 from eval import  plot_confusion_matrix,plot_to_image
@@ -102,8 +93,24 @@ def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,
 
         # Log the confusion matrix as an image summary.
         with file_writer.as_default():
-            tf.summary.image("Confusion Matrix", cm_image, step=epoch)
+            tf.summary.image("Validation Confusion Matrix", cm_image, step=epoch)
 
+        ###################
+        #repeat the same but with the training data
+        # Use the model to predict the values from the validation dataset.
+        test_pred_raw = model.predict(train_generator)
+        test_pred = np.argmax(test_pred_raw, axis=1)
+        #class_labels = list(val_ds.class_indices.keys())
+
+        # Calculate the confusion matrix.
+        cm = sklearn.metrics.confusion_matrix(train_generator.classes, test_pred)
+        # Log the confusion matrix as an image summary.
+        figure = plot_confusion_matrix(cm, train_generator.class_indices.keys())
+        cm_image = plot_to_image(figure)
+
+        # Log the confusion matrix as an image summary.
+        with file_writer.as_default():
+            tf.summary.image("Training Confusion Matrix", cm_image, step=epoch)
 
 
 

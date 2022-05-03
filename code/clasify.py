@@ -4,7 +4,7 @@ import numpy as np #para numeros
 import pandas as pd #para matrices
 from sklearn.impute import SimpleImputer #para missing
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder #para codificar categoricos
-from keras.utils import np_utils
+#from keras.utils import np_utils
 
 
 from os import listdir
@@ -60,9 +60,9 @@ def clasify_images(input,imgdir,sourceDir,newDirTOsplitImages):
     data = data[data["stage"] != 0]
     nsalidas = len(set(data["stage"]))
     data["target_enc"] = LabelEncoder().fit_transform(data.stage)
-    Y_hot = np_utils.to_categorical(data["target_enc"])
+    #Y_hot = np_utils.to_categorical(data["target_enc"])
     X = data
-    Y = Y_hot
+    #Y = Y_hot
 
     #to only take the files which are in the folder and not in the subfolders (so the discarded images are not taken)
     onlyfiles = [rchop(f,".png") for f in listdir(imgdir) if isfile(join(imgdir, f))]

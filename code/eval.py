@@ -1,6 +1,8 @@
 import tensorflow as tf
 from tensorflow import keras
+import matplotlib
 import matplotlib.pyplot as plt
+matplotlib.use('Agg')
 import itertools
 import numpy as np
 import sklearn.metrics
@@ -56,21 +58,21 @@ def plot_confusion_matrix(cm, class_names):
     return figure
 
 def evaluate_ann(model_dir,valDir,batch_size,log_dir=None):
-    model = tf.keras.models.load_model(model_dir + "model")
+    model = tf.keras.models.load_model(model_dir)
 
 
-    val_ds = tf.keras.utils.image_dataset_from_directory(
-      valDir,
-      seed=123,
-      image_size=(200, 200),
-      batch_size=batch_size)
+    # val_ds = tf.keras.utils.image_dataset_from_directory(
+    #   valDir,
+    #   seed=123,
+    #   image_size=(200, 200),
+    #   batch_size=batch_size)
 
 
 ###############################################################################
     validation_datagen = ImageDataGenerator(rescale=1. / 255)
     validation_generator = validation_datagen.flow_from_directory(valDir, batch_size=batch_size,
                                                                   class_mode='binary',
-                                                                  target_size=(200, 200))
+                                                                  target_size=(224, 224))
 
     true_labels = validation_generator.classes
     predictions = model.predict(validation_generator)
