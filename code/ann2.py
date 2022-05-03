@@ -1,57 +1,23 @@
 from model import VGG16_model
-
+import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 
-import numpy as np
 import sklearn.metrics
 from eval import  plot_confusion_matrix,plot_to_image
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-
+from utils import calculate_class_weights
+from tensorflow.python.client import device_lib
 
 def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,
-               learning_rate,n_classes,log_dir=None):
-    from tensorflow.python.client import device_lib
+               learning_rate,log_dir=None):
+
     print(tf.config.list_physical_devices())
 
     print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
     print(device_lib.list_local_devices())
 
-#################################
 
-    # train_ds = tf.keras.utils.image_dataset_from_directory(
-    #     trainDir,
-    #     seed=123,
-    #     image_size=(200, 200),
-    #     batch_size=batch_size)
-    #
-    # val_ds = tf.keras.utils.image_dataset_from_directory(
-    #   valDir,
-    #   seed=123,
-    #   image_size=(200, 200),
-    #   batch_size=batch_size)
-    #
-    # class_names = train_ds.class_names
-    # print(class_names)
-
-
-#################################
-    # for the use of multigpu
-    if n_gpus > 1:
-        device_type = 'GPU'
-        devices = tf.config.experimental.list_physical_devices(
-            device_type)
-        devices_names = [d.name.split("e:")[1] for d in devices]
-
-        strategy = tf.distribute.MirroredStrategy(
-            devices=devices_names[:n_gpus])
-
-        with strategy.scope():
-            model = VGG16_model(learning_rate,n_classes,10)
-    else:
-        model = VGG16_model(learning_rate,n_classes,10)
-
-########################################
     #logging
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
     file_writer = tf.summary.create_file_writer(log_dir)
@@ -77,8 +43,25 @@ def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,
     validation_generator = validation_datagen.flow_from_directory(valDir, batch_size=batch_size,
                                                                   class_mode='categorical',
                                                                   target_size=(224, 224))
-    ###################
-    ###################
+
+    n_classes = train_generator.num_classes
+    #################################
+    # for the use of multigpu
+    if n_gpus > 1:
+        device_type = 'GPU'
+        devices = tf.config.experimental.list_physical_devices(
+            device_type)
+        devices_names = [d.name.split("e:")[1] for d in devices]
+
+        strategy = tf.distribute.MirroredStrategy(
+            devices=devices_names[:n_gpus])
+
+        with strategy.scope():
+            model = VGG16_model(learning_rate, n_classes, 10)
+    else:
+        model = VGG16_model(learning_rate, n_classes, 10)
+
+    ########################################
     def log_confusion_matrix(epoch, logs):
         # Use the model to predict the values from the validation dataset.
         test_pred_raw = model.predict(validation_generator)
@@ -137,10 +120,8 @@ def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,
     steps_per_epoch = train_generator.n // batch_size
     validation_steps = validation_generator.n // batch_size
 
-    class_weight = {0: 3.15,
-                    1: 1.,
-                    2: 2.48,
-                    3: 28.84}
+
+    class_weight = calculate_class_weights(train_generator)
 
     model.fit(
         train_generator,
