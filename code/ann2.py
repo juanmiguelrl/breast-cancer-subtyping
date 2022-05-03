@@ -115,9 +115,25 @@ def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,
 
 
     cm_callback = keras.callbacks.LambdaCallback(on_epoch_end=log_confusion_matrix)
-
 ########################################
+    def log_learning_rate(epoch, logs):
+        lr = model.optimizer.learning_rate
+        with file_writer.as_default():
+            tf.summary.scalar('learning rate', lr, step=epoch)
 
+    lr_log = keras.callbacks.LambdaCallback(on_epoch_end=log_learning_rate)
+########################################
+    reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_acc', factor=0.2,
+                                  patience=5, min_lr=0)
+    early_stopping = tf.keras.callbacks.EarlyStopping(monitor="val_acc",patience=15)
+
+    model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+        filepath=logdir + "/best-{epoch}",
+        monitor='val_acc',
+        save_best_only=True)
+
+    baselogger = tf.keras.callbacks.BaseLogger()
+########################################
     steps_per_epoch = train_generator.n // batch_size
     validation_steps = validation_generator.n // batch_size
 
@@ -127,7 +143,7 @@ def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,
         steps_per_epoch=steps_per_epoch,
         validation_steps=validation_steps,
         epochs=epochs,
-        callbacks=[tensorboard_callback, cm_callback]
+        callbacks=[tensorboard_callback, cm_callback,reduce_lr,early_stopping,model_checkpoint_callback,lr_log]
     )
 
     model.save(model_dir)
