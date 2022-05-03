@@ -70,12 +70,12 @@ def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,
         horizontal_flip=True,
         fill_mode='nearest'
     )
-    train_generator = validation_datagen.flow_from_directory(trainDir,
+    train_generator = train_datagen.flow_from_directory(trainDir,
                                                         batch_size=batch_size,
-                                                        class_mode='binary',
+                                                        class_mode='categorical',
                                                         target_size=(224, 224))
     validation_generator = validation_datagen.flow_from_directory(valDir, batch_size=batch_size,
-                                                                  class_mode='binary',
+                                                                  class_mode='categorical',
                                                                   target_size=(224, 224))
     ###################
     ###################
@@ -98,19 +98,19 @@ def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,
         ###################
         #repeat the same but with the training data
         # Use the model to predict the values from the validation dataset.
-        test_pred_raw = model.predict(train_generator)
-        test_pred = np.argmax(test_pred_raw, axis=1)
+        test_pred_rawt = model.predict(train_generator)
+        test_predt = np.argmax(test_pred_rawt, axis=1)
         #class_labels = list(val_ds.class_indices.keys())
 
         # Calculate the confusion matrix.
-        cm = sklearn.metrics.confusion_matrix(train_generator.classes, test_pred)
+        cmt = sklearn.metrics.confusion_matrix(train_generator.classes, test_predt)
         # Log the confusion matrix as an image summary.
-        figure = plot_confusion_matrix(cm, train_generator.class_indices.keys())
-        cm_image = plot_to_image(figure)
+        figuret = plot_confusion_matrix(cmt, train_generator.class_indices.keys())
+        cm_imaget = plot_to_image(figuret)
 
         # Log the confusion matrix as an image summary.
         with file_writer.as_default():
-            tf.summary.image("Training Confusion Matrix", cm_image, step=epoch)
+            tf.summary.image("Training Confusion Matrix", cm_imaget, step=epoch)
 
 
 
@@ -123,13 +123,13 @@ def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,
 
     lr_log = keras.callbacks.LambdaCallback(on_epoch_end=log_learning_rate)
 ########################################
-    reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_acc', factor=0.2,
+    reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy', factor=0.2,
                                   patience=5, min_lr=0)
-    early_stopping = tf.keras.callbacks.EarlyStopping(monitor="val_acc",patience=15)
+    early_stopping = tf.keras.callbacks.EarlyStopping(monitor="val_accuracy",patience=15)
 
     model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
         filepath=logdir + "/best-{epoch}",
-        monitor='val_acc',
+        monitor='val_accuracy',
         save_best_only=True)
 
     baselogger = tf.keras.callbacks.BaseLogger()
@@ -137,13 +137,19 @@ def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,
     steps_per_epoch = train_generator.n // batch_size
     validation_steps = validation_generator.n // batch_size
 
+    class_weight = {0: 3.15,
+                    1: 1.,
+                    2: 2.48,
+                    3: 28.84}
+
     model.fit(
         train_generator,
         validation_data=validation_generator,
         steps_per_epoch=steps_per_epoch,
         validation_steps=validation_steps,
         epochs=epochs,
-        callbacks=[tensorboard_callback, cm_callback,reduce_lr,early_stopping,model_checkpoint_callback,lr_log]
+        callbacks=[tensorboard_callback, cm_callback,reduce_lr,early_stopping,model_checkpoint_callback,lr_log],
+        class_weight=class_weight
     )
 
     model.save(model_dir)
