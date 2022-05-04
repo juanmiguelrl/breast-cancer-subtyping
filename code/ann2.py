@@ -1,4 +1,4 @@
-from model import VGG16_model
+from model import VGG16_model,mobile_net_model
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
@@ -10,7 +10,7 @@ from utils import calculate_class_weights
 from tensorflow.python.client import device_lib
 
 def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,
-               learning_rate,log_dir=None):
+               learning_rate,log_dir=None,log=False):
 
     print(tf.config.list_physical_devices())
 
@@ -57,9 +57,9 @@ def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,
             devices=devices_names[:n_gpus])
 
         with strategy.scope():
-            model = VGG16_model(learning_rate, n_classes, 10)
+            model = mobile_net_model(learning_rate, n_classes, 50)
     else:
-        model = VGG16_model(learning_rate, n_classes, 10)
+        model = mobile_net_model(learning_rate, n_classes, 50)
 
     ########################################
     def log_confusion_matrix(epoch, logs):
@@ -122,6 +122,10 @@ def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,
 
 
     class_weight = calculate_class_weights(train_generator)
+    if log:
+        callbacks = [tensorboard_callback, cm_callback,reduce_lr,early_stopping,model_checkpoint_callback,lr_log]
+    else:
+        callbacks = None
 
     model.fit(
         train_generator,
@@ -129,7 +133,7 @@ def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,
         steps_per_epoch=steps_per_epoch,
         validation_steps=validation_steps,
         epochs=epochs,
-        callbacks=[tensorboard_callback, cm_callback,reduce_lr,early_stopping,model_checkpoint_callback,lr_log],
+        callbacks=callbacks,
         class_weight=class_weight
     )
 

@@ -1,6 +1,9 @@
 import tensorflow as tf
 from tensorflow.keras.applications import VGG16
-
+from tensorflow.keras.applications import MobileNetV2
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Conv2D, MaxPool2D, Flatten, Dropout
+from tensorflow.keras.optimizers import Adam, Adagrad
 
 def VGG16_model(learning_rate, n_classes,fine_tune=0):
     conv_base = VGG16(input_shape=(224, 224, 3),
@@ -34,4 +37,42 @@ def VGG16_model(learning_rate, n_classes,fine_tune=0):
                   loss='categorical_crossentropy',
                   metrics=['accuracy'])
 
+    return model
+
+def mobile_net_model(learning_rate, n_classes,fine_tune=0):
+    mobile_net = tf.keras.applications.MobileNetV2(input_shape=(224, 224, 3), include_top=False)
+    mobile_net.trainable = False  # keeeping mobile net weights same
+
+    trf_learn = Sequential()
+
+    trf_learn.add(mobile_net)
+    trf_learn.add(Flatten())
+
+    trf_learn.add(Dense(units=32, activation="relu"))
+    trf_learn.add(Dense(units=1, activation="sigmoid"))
+
+    trf_learn.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+
+    trf_learn.summary()
+
+    return trf_learn
+
+def conv_model(learning_rate, n_classes,fine_tune=0):
+    model = Sequential()
+
+    model.add(Conv2D(filters=32, kernel_size=(5, 5), activation="relu", padding="valid", input_shape=[224, 224, 3]))
+    model.add(MaxPool2D(pool_size=2, strides=2))
+
+    model.add(Conv2D(filters=64, kernel_size=(5, 5), activation="relu"))
+    model.add(MaxPool2D(pool_size=2, strides=2))
+
+    model.add(Flatten())
+
+    model.add(Dense(units=32, activation="relu"))
+    model.add(Dropout(0.4))
+
+    model.add(Dense(units=1, activation="softmax"))
+
+    model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+    model.summary()
     return model
