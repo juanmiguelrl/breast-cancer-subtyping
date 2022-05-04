@@ -34,19 +34,19 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 matplotlib.use('Agg')
 
 
-trainDir = "/mnt/netapp2/Store_uni/home/ulc/co/jrl/ai/dog_cat_data/training_set"
-valDir = "/mnt/netapp2/Store_uni/home/ulc/co/jrl/ai/dog_cat_data/test_set"
-# trainDir = "/mnt/netapp2/Store_uni/home/ulc/co/jrl/imgdir/images_together_filtered_classified/train"
-# valDir = "/mnt/netapp2/Store_uni/home/ulc/co/jrl/imgdir/images_together_filtered_classified/test"
+#trainDir = "/mnt/netapp2/Store_uni/home/ulc/co/jrl/ai/dog_cat_data/training_set"
+#valDir = "/mnt/netapp2/Store_uni/home/ulc/co/jrl/ai/dog_cat_data/test_set"
+trainDir = "/mnt/netapp2/Store_uni/home/ulc/co/jrl/imgdir/images_together_filtered_classified/train"
+valDir = "/mnt/netapp2/Store_uni/home/ulc/co/jrl/imgdir/images_together_filtered_classified/test"
 batch_size = 32
 
 def train_ann( trainDir, valDir,batch_size):
 
 
     train_datagen = ImageDataGenerator(preprocessing_function=tf.keras.applications.vgg16.preprocess_input,rescale=1. / 255,
-                                           # shear_range=0.2,
-                                           # zoom_range=0.2,
-                                           #horizontal_flip=True
+                                           shear_range=0.2,
+                                           zoom_range=0.2,
+                                           horizontal_flip=True
                                            )
 
     training_set = train_datagen.flow_from_directory(trainDir,batch_size=batch_size,
@@ -85,9 +85,11 @@ def train_ann( trainDir, valDir,batch_size):
 
     model.compile(optimizer=Adam(learning_rate=0.0001), loss='categorical_crossentropy', metrics=['accuracy'])
 
+    class_weight = calculate_class_weights(training_set)
     model.fit(x=training_set,
               steps_per_epoch=len(training_set),
-              epochs=5
+              epochs=10,
+              class_weight=class_weight
               )
 
     predictions = model.predict(x = test_set, steps = len(test_set), verbose = 0)
