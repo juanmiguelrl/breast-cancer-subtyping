@@ -10,6 +10,50 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from datetime import datetime
 import io
 
+class confusion_matrix_callback(keras.callbacks.Callback):
+    def __init__(self,file_writer,validation_generator,train_generator):
+        self.file_writer = file_writer
+        self.validation_generator = validation_generator
+        self.train_generator = train_generator
+    def on_epoch_end(self, epoch, logs=None):
+        # Use the model to predict the values from the validation dataset.
+        test_pred_raw = self.model.predict(self.validation_generator)
+        test_pred = np.argmax(test_pred_raw, axis=1)
+        #class_labels = list(val_ds.class_indices.keys())
+
+        # Calculate the confusion matrix.
+        cm = sklearn.metrics.confusion_matrix(self.validation_generator.classes, test_pred)
+        # Log the confusion matrix as an image summary.
+        figure = plot_confusion_matrix(cm, self.validation_generator.class_indices.keys())
+        cm_image = plot_to_image(figure)
+
+        # Log the confusion matrix as an image summary.
+        with self.file_writer.as_default():
+            tf.summary.image("Validation Confusion Matrix", cm_image, step=epoch)
+
+        ###################        #repeat the same but with the training data
+        # Use the model to predict the values from the validation dataset.
+        test_pred_rawt = self.model.predict(self.train_generator)
+        test_predt = np.argmax(test_pred_rawt, axis=1)
+        #class_labels = list(val_ds.class_indices.keys())
+
+        # Calculate the confusion matrix.
+        cmt = sklearn.metrics.confusion_matrix(self.train_generator.classes, test_predt)
+        # Log the confusion matrix as an image summary.
+        figuret = plot_confusion_matrix(cmt, self.train_generator.class_indices.keys())
+        cm_imaget = plot_to_image(figuret)
+
+        # Log the confusion matrix as an image summary.
+        with self.file_writer.as_default():
+            tf.summary.image("Training Confusion Matrix", cm_imaget, step=epoch)
+
+class log_learning_rate_callback(keras.callbacks.Callback):
+    def __init__(self,file_writer):
+        self.file_writer = file_writer
+    def on_epoch_end(self, epoch, logs=None):
+        lr = self.model.optimizer.learning_rate
+        with self.file_writer.as_default():
+            tf.summary.scalar('learning rate', lr, step=epoch)
 
 def plot_to_image(figure):
     """Converts the matplotlib plot specified by 'figure' to a PNG image and

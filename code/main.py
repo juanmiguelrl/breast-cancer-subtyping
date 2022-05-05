@@ -1,5 +1,5 @@
 import argparse
-import image_preprocess, store_images, filters, clasify, ann3, eval
+import image_preprocess, store_images, filters, clasify, ann2, eval
 import json
 from datetime import datetime
 
@@ -46,8 +46,9 @@ if __name__ == '__main__':
         log_dir = PARAMS["logdir"] + datetime.now().strftime("%Y%m%d-%H%M%S")
     if args.t:
         print("training network...")
-        ann3.train_ann(PARAMS["ann"]["trainDir"], PARAMS["ann"]["testDir"], PARAMS["logdir"], PARAMS["ann"]["batch_size"], PARAMS["ann"]["epochs"],
-                       PARAMS["n_gpus"], PARAMS["model_dir"],PARAMS["ann"]["learning_rate"],log_dir,args.l)
+        ann2.train_ann(PARAMS["ann"],PARAMS["model_dir"],log_dir)
+        #ann3.train_ann(PARAMS["ann"]["trainDir"], PARAMS["ann"]["testDir"], PARAMS["logdir"], PARAMS["ann"]["batch_size"], PARAMS["ann"]["epochs"],
+        #               PARAMS["n_gpus"], PARAMS["model_dir"],PARAMS["ann"]["learning_rate"],log_dir,args.l)
     if args.e:
         print("evaluating network...")
         eval.evaluate_ann(PARAMS["model_dir"],PARAMS["eval"]["testDir"],PARAMS["eval"]["batch_size"],log_dir)

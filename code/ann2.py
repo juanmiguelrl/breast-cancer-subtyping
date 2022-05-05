@@ -1,138 +1,116 @@
-from model import VGG16_model,mobile_net_model
+from model import VGG16_model,mobile_net_model,build_model,conv_model2
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 
 import sklearn.metrics
-from eval import  plot_confusion_matrix,plot_to_image
+from eval import  plot_confusion_matrix,plot_to_image,confusion_matrix_callback,log_learning_rate_callback
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from utils import calculate_class_weights
 from tensorflow.python.client import device_lib
 
-def train_ann( trainDir, valDir, logdir, batch_size, epochs, n_gpus,model_dir,
-               learning_rate,log_dir=None,log=False):
+def train_ann( parameters,model_dir,log_dir):
 
     print(tf.config.list_physical_devices())
-
     print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
     print(device_lib.list_local_devices())
 
+    if parameters["data_augmentation"]:
+        # Data augmentation
+        train_datagen = ImageDataGenerator(
+            rescale=1. / 255,
+            rotation_range=40,
+            width_shift_range=0.2,
+            height_shift_range=0.2,
+            shear_range=0.2,
+            zoom_range=0.2,
+            horizontal_flip=True,
+            fill_mode='nearest'
+        )
+    else:
+        train_datagen = ImageDataGenerator(preprocessing_function=tf.keras.applications.vgg16.preprocess_input,
+                                           rescale=1. / 255)
 
-    #logging
-    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
-    file_writer = tf.summary.create_file_writer(log_dir)
-    # Define the per-epoch callback.
-
-
-    validation_datagen = ImageDataGenerator(rescale=1. / 255)
-    # Data augmentation
-    train_datagen = ImageDataGenerator(
-        rescale=1. / 255,
-        rotation_range=40,
-        width_shift_range=0.2,
-        height_shift_range=0.2,
-        shear_range=0.2,
-        zoom_range=0.2,
-        horizontal_flip=True,
-        fill_mode='nearest'
-    )
-    train_generator = train_datagen.flow_from_directory(trainDir,
-                                                        batch_size=batch_size,
+    train_generator = train_datagen.flow_from_directory(parameters["trainDir"],
+                                                        batch_size=parameters["batch_size"],
                                                         class_mode='categorical',
                                                         target_size=(224, 224))
-    validation_generator = validation_datagen.flow_from_directory(valDir, batch_size=batch_size,
+
+    validation_datagen = ImageDataGenerator(preprocessing_function=tf.keras.applications.vgg16.preprocess_input,
+                                          rescale=1. / 255)
+    validation_generator = validation_datagen.flow_from_directory(parameters["testDir"],
+                                                                  batch_size=parameters["batch_size"],
                                                                   class_mode='categorical',
-                                                                  target_size=(224, 224))
+                                                                  target_size=(224, 224),
+                                                                  shuffle=False)
 
     n_classes = train_generator.num_classes
     #################################
     # for the use of multigpu
-    if n_gpus > 1:
+    if parameters["n_gpus"] > 1:
         device_type = 'GPU'
         devices = tf.config.experimental.list_physical_devices(
             device_type)
         devices_names = [d.name.split("e:")[1] for d in devices]
 
         strategy = tf.distribute.MirroredStrategy(
-            devices=devices_names[:n_gpus])
+            devices=devices_names[:parameters["n_gpus"]])
 
         with strategy.scope():
-            model = mobile_net_model(learning_rate, n_classes, 50)
+            model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"])
     else:
-        model = mobile_net_model(learning_rate, n_classes, 50)
+        model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"])
 
-    ########################################
-    def log_confusion_matrix(epoch, logs):
-        # Use the model to predict the values from the validation dataset.
-        test_pred_raw = model.predict(validation_generator)
-        test_pred = np.argmax(test_pred_raw, axis=1)
-        #class_labels = list(val_ds.class_indices.keys())
-
-        # Calculate the confusion matrix.
-        cm = sklearn.metrics.confusion_matrix(validation_generator.classes, test_pred)
-        # Log the confusion matrix as an image summary.
-        figure = plot_confusion_matrix(cm, validation_generator.class_indices.keys())
-        cm_image = plot_to_image(figure)
-
-        # Log the confusion matrix as an image summary.
-        with file_writer.as_default():
-            tf.summary.image("Validation Confusion Matrix", cm_image, step=epoch)
-
-        ###################
-        #repeat the same but with the training data
-        # Use the model to predict the values from the validation dataset.
-        test_pred_rawt = model.predict(train_generator)
-        test_predt = np.argmax(test_pred_rawt, axis=1)
-        #class_labels = list(val_ds.class_indices.keys())
-
-        # Calculate the confusion matrix.
-        cmt = sklearn.metrics.confusion_matrix(train_generator.classes, test_predt)
-        # Log the confusion matrix as an image summary.
-        figuret = plot_confusion_matrix(cmt, train_generator.class_indices.keys())
-        cm_imaget = plot_to_image(figuret)
-
-        # Log the confusion matrix as an image summary.
-        with file_writer.as_default():
-            tf.summary.image("Training Confusion Matrix", cm_imaget, step=epoch)
-
-
-
-    cm_callback = keras.callbacks.LambdaCallback(on_epoch_end=log_confusion_matrix)
-########################################
-    def log_learning_rate(epoch, logs):
-        lr = model.optimizer.learning_rate
-        with file_writer.as_default():
-            tf.summary.scalar('learning rate', lr, step=epoch)
-
-    lr_log = keras.callbacks.LambdaCallback(on_epoch_end=log_learning_rate)
-########################################
-    reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy', factor=0.2,
-                                  patience=5, min_lr=0)
-    early_stopping = tf.keras.callbacks.EarlyStopping(monitor="val_accuracy",patience=15)
-
-    model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-        filepath=logdir + "/best-{epoch}",
-        monitor='val_accuracy',
-        save_best_only=True)
-
-    baselogger = tf.keras.callbacks.BaseLogger()
-########################################
-    steps_per_epoch = train_generator.n // batch_size
-    validation_steps = validation_generator.n // batch_size
+    steps_per_epoch = train_generator.n // parameters["batch_size"]
+    validation_steps = validation_generator.n // parameters["batch_size"]
 
 
     class_weight = calculate_class_weights(train_generator)
-    if log:
-        callbacks = [tensorboard_callback, cm_callback,reduce_lr,early_stopping,model_checkpoint_callback,lr_log]
+    #################################
+    #prepare callbacks
+    file_writer = tf.summary.create_file_writer(log_dir)
+    callbacks = []
+    if parameters["callbacks"]["tensorboard"]:
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+        callbacks.append(tensorboard_callback)
+    if parameters["callbacks"]["checkpoint"]:
+        model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+            filepath=log_dir + "/best-{epoch}",
+            monitor='val_accuracy',
+            save_best_only=True)
+        callbacks.append(model_checkpoint_callback)
+
+        if parameters["callbacks"]["early_stopping"]:
+            early_stopping = tf.keras.callbacks.EarlyStopping(monitor="val_accuracy",
+                                                              patience=parameters["callbacks_data"]["early_stopping_patience"])
+            callbacks.append(early_stopping)
+
+        if parameters["callbacks"]["reduce_lr"]:
+            reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy',
+                                                             factor=parameters["callbacks_data"]["reduce_lr_factor"],
+                                                            patience=parameters["callbacks_data"]["reduce_lr_patience"],
+                                                             min_lr=parameters["callbacks_data"]["reduce_lr_min_lr"])
+            callbacks.append(reduce_lr)
+
+        if parameters["callbacks"]["log"]:
+            callbacks.append(log_learning_rate_callback(file_writer))
+            #lr_log = keras.callbacks.LambdaCallback(on_epoch_end=log_learning_rate)
+            #callbacks.append(lr_log)
+        if parameters["callbacks"]["confusion_matrix"]:
+            callbacks.append(confusion_matrix_callback(file_writer,validation_generator,train_generator))
+            #cm_callback = keras.callbacks.LambdaCallback(on_epoch_end=log_confusion_matrix(self=model))
+
+        #callbacks = [tensorboard_callback, cm_callback,reduce_lr,early_stopping,model_checkpoint_callback,lr_log]
     else:
         callbacks = None
+    #################################
 
     model.fit(
         train_generator,
         validation_data=validation_generator,
         steps_per_epoch=steps_per_epoch,
         validation_steps=validation_steps,
-        epochs=epochs,
+        epochs=parameters["epochs"],
         callbacks=callbacks,
         class_weight=class_weight
     )

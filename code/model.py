@@ -39,6 +39,49 @@ def VGG16_model(learning_rate, n_classes,fine_tune=0):
 
     return model
 
+
+def VGG16_model2(learning_rate, n_classes,fine_tune=0):
+    vgg16_model = tf.keras.applications.vgg16.VGG16()
+
+    model = Sequential()
+    for layer in vgg16_model.layers[:-1]:
+        model.add(layer)
+    for layer in model.layers:
+        layer.trainable = False
+
+    # if fine_tune > 0:
+    #     for layer in model.layers[:-fine_tune]:
+    #         layer.trainable = False
+    # else:
+    #     for layer in model.layers:
+    #         layer.trainable = False
+
+    model.add(Dense(units=n_classes, activation='softmax'))
+    model.compile(optimizer=Adam(learning_rate=learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
+    model.summary()
+    return model
+
+def conv_model2(learning_rate, n_classes,fine_tune=0):
+
+    if fine_tune > 0:
+        for layer in conv_base.layers[:-fine_tune]:
+            layer.trainable = False
+    else:
+        for layer in conv_base.layers:
+            layer.trainable = False
+
+    model = Sequential([
+            Conv2D(filters=32, kernel_size=(3, 3), activation='relu', padding='same', input_shape=(224, 224, 3)),
+            MaxPool2D(pool_size=(2, 2), strides=2),
+            Conv2D(filters=64, kernel_size=(3, 3), activation='relu', padding='same'),
+            MaxPool2D(pool_size=(2, 2), strides=2),
+            Flatten(),
+            Dense(units=n_classes, activation='softmax')
+    ])
+    model.compile(optimizer=Adam(learning_rate=learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
+    model.summary()
+    return model
+
 def mobile_net_model(learning_rate, n_classes,fine_tune=0):
     mobile_net = tf.keras.applications.MobileNetV2(input_shape=(224, 224, 3), include_top=False)
     mobile_net.trainable = False  # keeeping mobile net weights same
@@ -76,3 +119,13 @@ def conv_model(learning_rate, n_classes,fine_tune=0):
     model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
     model.summary()
     return model
+
+def build_model(learning_rate, n_classes,fine_tune=0,model_name="vgg16"):
+    if model_name == "vgg16":
+        return VGG16_model2(learning_rate, n_classes,fine_tune)
+    elif model_name == "mobile_net":
+        return mobile_net_model(learning_rate, n_classes,fine_tune)
+    elif model_name == "conv":
+        return conv_model(learning_rate, n_classes,fine_tune)
+    else:
+        return VGG16_model2(learning_rate, n_classes,fine_tune)
