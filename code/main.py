@@ -39,7 +39,7 @@ if __name__ == '__main__':
         filters.filter_images(PARAMS["filter"]["input_dir"], PARAMS["filter"]["destination_path"], PARAMS["filter"]["prefix"], PARAMS["filter"]["resize_size"])
     if args.c:
         print("clasifying images...")
-        clasify.clasify_images(PARAMS["clasify"]["input"], PARAMS["clasify"]["imgdir"], PARAMS["clasify"]["sourceDir"], PARAMS["clasify"]["newDirTOsplitImages"])
+        clasify.clasify_images(PARAMS["clasify"]["input"], PARAMS["clasify"]["imgdir"], PARAMS["clasify"]["sourceDir"], PARAMS["clasify"]["newDirTOsplitImages"],PARAMS["classification"])
 
     if args.t or args.e:
         # Sets up a timestamped log directory.

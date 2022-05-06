@@ -51,7 +51,7 @@ def copyFiles(sourceDir, destDir, fileList):
     for file in fileList:
         shutil.copy(os.path.join(sourceDir, file+".png"), destDir)
 
-def clasify_images(input,imgdir,sourceDir,newDirTOsplitImages):
+def clasify_images_old(input,imgdir,sourceDir,newDirTOsplitImages):
     data = pd.read_csv(input, sep='\t', header=0)
 
     data["stage"] = data["ajcc_pathologic_stage"].apply(simplify)
@@ -134,6 +134,54 @@ def clasify_images(input,imgdir,sourceDir,newDirTOsplitImages):
     copyFiles(sourceDir, testDirC2, testC2)
     copyFiles(sourceDir, testDirC3, testC3)
     copyFiles(sourceDir, testDirC4, testC4)
+
+
+#####################################################################
+#simplify the the pathologic state in 4 stages
+def indicate_NaN(x):
+    #check if x is string
+    if not isinstance(x, str):
+        return "NaN"
+
+
+
+def clasify_images(input,imgdir,sourceDir,newDirTOsplitImages,classification):
+    data = pd.read_csv(input, sep='\t', header=0)
+    data["stage"] = data[classification].apply(indicate_NaN)
+    # drop rows with stage NaN (which is the stage previously added in indicate_NaN() for the missing values)
+    data = data[data["stage"] != "NaN"]
+    data["target_enc"] = LabelEncoder().fit_transform(data.stage)
+    X = data
+
+    #to only take the files which are in the folder and not in the subfolders (so the discarded images are not taken)
+    onlyfiles = [rchop(f,".png") for f in listdir(imgdir) if isfile(join(imgdir, f))]
+
+    #drop rows of X which are not in onlyfiles
+    Xold = X.copy()
+    X = X[X["filename"].apply(cut_svs).isin(onlyfiles)]
+    X["filename"] = X["filename"].apply(cut_svs)
+
+    trainX, testX = train_test_split(X, test_size=0.25, stratify=X[classification])
+
+    makedirectory(newDirTOsplitImages)
+    trainDir = os.path.join(newDirTOsplitImages, 'train')
+    makedirectory(trainDir)
+    testDir = os.path.join(newDirTOsplitImages, 'test')
+    makedirectory(testDir)
+
+    for element in X[classification].unique():
+        train = list(trainX.loc[trainX[classification] == element]["filename"])
+        test = list(testX.loc[testX[classification] == element]["filename"])
+        #make a directory for each subtype
+        trainsubtype = os.path.join(trainDir, element)
+        makedirectory(trainsubtype)
+        testsubtype = os.path.join(testDir, element)
+        makedirectory(testsubtype)
+        #copy the files into the subtype directory
+        copyFiles(sourceDir, trainsubtype, train)
+        copyFiles(sourceDir, testsubtype, test)
+
+
 
 
 
