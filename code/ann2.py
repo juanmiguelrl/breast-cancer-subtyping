@@ -65,20 +65,24 @@ def train_ann( parameters,model_dir,log_dir):
     validation_steps = validation_generator.n // parameters["batch_size"]
 
 
-    class_weight = calculate_class_weights(train_generator)
+    if parameters["class weights"]:
+        class_weight = calculate_class_weights(train_generator)
+    else:
+        class_weight = None
     #################################
     #prepare callbacks
-    file_writer = tf.summary.create_file_writer(log_dir)
-    callbacks = []
-    if parameters["callbacks"]["tensorboard"]:
-        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
-        callbacks.append(tensorboard_callback)
-    if parameters["callbacks"]["checkpoint"]:
-        model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-            filepath=log_dir + "/best-{epoch}",
-            monitor='val_accuracy',
-            save_best_only=True)
-        callbacks.append(model_checkpoint_callback)
+    if parameters["log"]:
+        file_writer = tf.summary.create_file_writer(log_dir)
+        callbacks = []
+        if parameters["callbacks"]["tensorboard"]:
+            tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+            callbacks.append(tensorboard_callback)
+        if parameters["callbacks"]["checkpoint"]:
+            model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+                filepath=log_dir + "/best-{epoch}",
+                monitor='val_accuracy',
+                save_best_only=True)
+            callbacks.append(model_checkpoint_callback)
 
         if parameters["callbacks"]["early_stopping"]:
             early_stopping = tf.keras.callbacks.EarlyStopping(monitor="val_accuracy",
@@ -104,6 +108,8 @@ def train_ann( parameters,model_dir,log_dir):
     else:
         callbacks = None
     #################################
+
+
 
     model.fit(
         train_generator,
