@@ -2,11 +2,20 @@ import argparse
 import image_preprocess, store_images, filters, clasify, ann2, eval
 import json
 from datetime import datetime
+import nni
 
 def json_params(json_file):
     with open(json_file) as f:
         params = json.load(f)
     return params
+
+def nni_params(params):
+    print("uptdating params with nni")
+    updated_params = nni.get_next_parameter()
+    params["ann"].update(updated_params)
+    print("Config after update with NNI config:")
+    print(json.dumps(PARAMS, indent=2))
+    return PARAMS
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -22,11 +31,15 @@ if __name__ == '__main__':
     parser.add_argument("--e", help="evaluate the model", required=False, default=False, action="store_true")
     parser.add_argument("--j", help="json file with the variables", required=True)
     parser.add_argument("--l", help="to log during the training or not", required=False, default=False, action="store_true")
+    parser.add_argument("--n","--nni", help="to use nni or not", required=False, default=False, action="store_true")
 
     args = parser.parse_args()
     print(args)
 
     PARAMS = json_params(args.j)
+
+    if args.n:
+        PARAMS = nni_params(PARAMS)
 
     if args.d:
         print("dowsncaling...")

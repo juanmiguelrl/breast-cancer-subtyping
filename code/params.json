@@ -10,16 +10,30 @@
     "input_dir" : "D:\\onedriveudc\\OneDrive - Universidade da Coruña\\tfg\\python\\data\\images32\\*\\*"
 
     },
+    "filter" : {
+        "input_dir" : "D:\\Escritorio\\tfg\\test\\images_together\\*",
+        "destination_path" : "D:\\Escritorio\\tfg\\test\\images_together_filtered2",
+        "prefix" : "D:\\Escritorio\\tfg\\test\\images_together",
+        "resize_size" : 896
+    },
+    "clasify" : {
+        "input" : "D:/Escritorio/tfg/test/slide_classification.csv",
+        "imgdir" : "D:/Escritorio/tfg/test/images_together_filtered2",
+        "sourceDir" : "D:/Escritorio/tfg/test/images_together_filtered2/",
+        "newDirTOsplitImages" : "D:/Escritorio/tfg/test/images_together_filtered_classified_pam50"
+    },
     "ann" : {
-        "trainDir" : "D:/Escritorio/tfg/test/images_together_filtered_classified/train",
-        "testDir" : "D:/Escritorio/tfg/test/images_together_filtered_classified/test",
+        "trainDir" : "D:/Escritorio/tfg/test/images_together_filtered_classified_pam50/train",
+        "testDir" : "D:/Escritorio/tfg/test/images_together_filtered_classified_pam50/test",
         "batch_size" : 32,
         "epochs" : 30,
         "n_gpus" : 1,
         "learning_rate" : 0.0001,
         "data_augmentation" : false,
         "fine_tune" : 0,
-        "model_name" : "vgg16",
+        "model_name" : "VGG16",
+        "class_weights" : true,
+        "preprocessing_function" : true,
         "log" : false,
         "callbacks" : {
             "tensorboard" : true,
@@ -38,6 +52,7 @@
             "reduce_lr_min_lr" : 0
         }
     },
+    "classification" : "BRCA_Subtype_PAM50",
     "model_dir" : "D:/Escritorio/tfg/test/models/model",
     "logdir" : "D:/Escritorio/tfg/test/logs/"
 }

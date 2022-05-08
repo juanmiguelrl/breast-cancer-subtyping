@@ -3,6 +3,9 @@ pandas
 
 
 #ann.py
-tensorflow
 pillow
 scipy
+tensorflow==2.8.0
+pandas==1.4.2
+numpy==1.22.3
+nni

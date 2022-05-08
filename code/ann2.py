@@ -15,9 +15,20 @@ def train_ann( parameters,model_dir,log_dir):
     print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
     print(device_lib.list_local_devices())
 
+    if parameters['preprocessing_function']:
+        if parameters['model_name'] == 'VGG16':
+            preprocess_func = tf.keras.applications.vgg16.preprocess_input
+        elif parameters['model_name'] == 'mobile_net':
+            preprocess_func = tf.keras.applications.mobilenet_v2.preprocess_input
+        else:
+            preprocess_func = None
+    else:
+        preprocess_func = None
+
     if parameters["data_augmentation"]:
         # Data augmentation
         train_datagen = ImageDataGenerator(
+            preprocessing_function=preprocess_func,
             rescale=1. / 255,
             rotation_range=40,
             width_shift_range=0.2,
@@ -28,7 +39,7 @@ def train_ann( parameters,model_dir,log_dir):
             fill_mode='nearest'
         )
     else:
-        train_datagen = ImageDataGenerator(preprocessing_function=tf.keras.applications.vgg16.preprocess_input,
+        train_datagen = ImageDataGenerator(preprocessing_function=preprocess_func,
                                            rescale=1. / 255)
 
     train_generator = train_datagen.flow_from_directory(parameters["trainDir"],
@@ -36,7 +47,7 @@ def train_ann( parameters,model_dir,log_dir):
                                                         class_mode='categorical',
                                                         target_size=(224, 224))
 
-    validation_datagen = ImageDataGenerator(preprocessing_function=tf.keras.applications.vgg16.preprocess_input,
+    validation_datagen = ImageDataGenerator(preprocessing_function=preprocess_func,
                                           rescale=1. / 255)
     validation_generator = validation_datagen.flow_from_directory(parameters["testDir"],
                                                                   batch_size=parameters["batch_size"],
@@ -65,7 +76,7 @@ def train_ann( parameters,model_dir,log_dir):
     validation_steps = validation_generator.n // parameters["batch_size"]
 
 
-    if parameters["class weights"]:
+    if parameters["class_weights"]:
         class_weight = calculate_class_weights(train_generator)
     else:
         class_weight = None
