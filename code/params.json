@@ -31,10 +31,10 @@
         "learning_rate" : 0.0001,
         "data_augmentation" : false,
         "fine_tune" : 0,
-        "model_name" : "VGG16",
+        "model_name" : "xception",
         "class_weights" : true,
         "preprocessing_function" : true,
-        "log" : false,
+        "log" : true,
         "callbacks" : {
             "tensorboard" : true,
             "checkpoint" : true,

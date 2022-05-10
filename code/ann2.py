@@ -1,29 +1,38 @@
 from model import VGG16_model,mobile_net_model,build_model,conv_model2
 import numpy as np
 import tensorflow as tf
+import nni
 from tensorflow import keras
 
 import sklearn.metrics
-from eval import  plot_confusion_matrix,plot_to_image,confusion_matrix_callback,log_learning_rate_callback
+from eval import  plot_confusion_matrix,plot_to_image,confusion_matrix_callback,log_learning_rate_callback, log_nni_callback
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from utils import calculate_class_weights
 from tensorflow.python.client import device_lib
 
-def train_ann( parameters,model_dir,log_dir):
+def train_ann( parameters,model_dir,log_dir,nni_activated):
 
     print(tf.config.list_physical_devices())
     print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
     print(device_lib.list_local_devices())
 
+
     if parameters['preprocessing_function']:
         if parameters['model_name'] == 'VGG16':
             preprocess_func = tf.keras.applications.vgg16.preprocess_input
+            #target_size = (224,224)
         elif parameters['model_name'] == 'mobile_net':
             preprocess_func = tf.keras.applications.mobilenet_v2.preprocess_input
+            #target_size = (224,224)
+        elif parameters['model_name'] == 'xception':
+            preprocess_func = tf.keras.applications.xception.preprocess_input
+            #target_size = (299, 299)
         else:
             preprocess_func = None
+            #target_size = (224,224)
     else:
         preprocess_func = None
+        #target_size = (224,224)
 
     if parameters["data_augmentation"]:
         # Data augmentation
@@ -45,14 +54,14 @@ def train_ann( parameters,model_dir,log_dir):
     train_generator = train_datagen.flow_from_directory(parameters["trainDir"],
                                                         batch_size=parameters["batch_size"],
                                                         class_mode='categorical',
-                                                        target_size=(224, 224))
+                                                        target_size=parameters["target_size"])
 
     validation_datagen = ImageDataGenerator(preprocessing_function=preprocess_func,
                                           rescale=1. / 255)
     validation_generator = validation_datagen.flow_from_directory(parameters["testDir"],
                                                                   batch_size=parameters["batch_size"],
                                                                   class_mode='categorical',
-                                                                  target_size=(224, 224),
+                                                                  target_size=parameters["target_size"],
                                                                   shuffle=False)
 
     n_classes = train_generator.num_classes
@@ -68,9 +77,9 @@ def train_ann( parameters,model_dir,log_dir):
             devices=devices_names[:parameters["n_gpus"]])
 
         with strategy.scope():
-            model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"])
+            model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"],parameters["target_size"])
     else:
-        model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"])
+        model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"],parameters["target_size"])
 
     steps_per_epoch = train_generator.n // parameters["batch_size"]
     validation_steps = validation_generator.n // parameters["batch_size"]
@@ -117,10 +126,14 @@ def train_ann( parameters,model_dir,log_dir):
 
         #callbacks = [tensorboard_callback, cm_callback,reduce_lr,early_stopping,model_checkpoint_callback,lr_log]
     else:
-        callbacks = None
+        callbacks = []
     #################################
 
-
+    if nni_activated:
+        verbose = 0
+        callbacks.append(log_nni_callback())
+    else:
+        verbose = 1
 
     model.fit(
         train_generator,
@@ -129,8 +142,14 @@ def train_ann( parameters,model_dir,log_dir):
         validation_steps=validation_steps,
         epochs=parameters["epochs"],
         callbacks=callbacks,
-        class_weight=class_weight
+        class_weight=class_weight,
+        verbose=verbose
     )
+
+    #test_acc = test(args, model, device, test_loader)
+    test_acc = model.evaluate(validation_generator)
+    print("Test accuracy:", test_acc)
+    nni.report_final_result(test_acc)
 
     model.save(model_dir)
 

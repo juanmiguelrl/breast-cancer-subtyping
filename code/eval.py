@@ -9,6 +9,7 @@ import sklearn.metrics
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from datetime import datetime
 import io
+import nni
 
 class confusion_matrix_callback(keras.callbacks.Callback):
     def __init__(self,file_writer,validation_generator,train_generator):
@@ -18,6 +19,7 @@ class confusion_matrix_callback(keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs=None):
         # Use the model to predict the values from the validation dataset.
         test_pred_raw = self.model.predict(self.validation_generator)
+        #print(test_pred_raw)
         test_pred = np.argmax(test_pred_raw, axis=1)
         #class_labels = list(val_ds.class_indices.keys())
 
@@ -54,6 +56,11 @@ class log_learning_rate_callback(keras.callbacks.Callback):
         lr = self.model.optimizer.learning_rate
         with self.file_writer.as_default():
             tf.summary.scalar('learning rate', lr, step=epoch)
+
+
+class log_nni_callback(keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs=None):
+            nni.report_intermediate_result(logs["accuracy"])
 
 def plot_to_image(figure):
     """Converts the matplotlib plot specified by 'figure' to a PNG image and

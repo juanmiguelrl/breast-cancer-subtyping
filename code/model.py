@@ -1,11 +1,12 @@
 import tensorflow as tf
 from tensorflow.keras.applications import VGG16
 from tensorflow.keras.applications import MobileNetV2
+from tensorflow.keras.applications import Xception
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Conv2D, MaxPool2D, Flatten, Dropout
 from tensorflow.keras.optimizers import Adam, Adagrad
 
-def VGG16_model(learning_rate, n_classes,fine_tune=0):
+def VGG16_model(learning_rate, n_classes,fine_tune,input_shape):
     conv_base = VGG16(input_shape=(224, 224, 3),
                               include_top=False,
                               weights='imagenet')
@@ -40,14 +41,17 @@ def VGG16_model(learning_rate, n_classes,fine_tune=0):
     return model
 
 
-def VGG16_model2(learning_rate, n_classes,fine_tune=0):
+def VGG16_model2(learning_rate, n_classes,fine_tune,input_shape):
     vgg16_model = tf.keras.applications.vgg16.VGG16()
+
 
     model = Sequential()
     for layer in vgg16_model.layers[:-1]:
         model.add(layer)
     for layer in model.layers:
         layer.trainable = False
+
+
 
     # if fine_tune > 0:
     #     for layer in model.layers[:-fine_tune]:
@@ -120,12 +124,104 @@ def conv_model(learning_rate, n_classes,fine_tune=0):
     model.summary()
     return model
 
-def build_model(learning_rate, n_classes,fine_tune=0,model_name="vgg16"):
+
+class Patches(tf.keras.layers.Layer):
+    def __init__(self, patch_size):
+        super(Patches, self).__init__()
+        self.patch_size = patch_size
+
+    def call(self, images):
+        batch_size = tf.shape(images)[0]
+        patches = tf.image.extract_patches(
+            images=images,
+            sizes=[1, self.patch_size, self.patch_size, 1],
+            strides=[1, self.patch_size, self.patch_size, 1],
+            rates=[1, 1, 1, 1],
+            padding="VALID",
+        )
+        patch_dims = patches.shape[-1]
+        patches = tf.reshape(patches, [batch_size, -1, patch_dims])
+        return patches
+
+class CreatePatches( tf.keras.layers.Layer ):
+
+  def __init__( self , patch_size ):
+    super( CreatePatches , self ).__init__()
+    self.patch_size = patch_size
+
+  def call(self, inputs ):
+    patches = []
+    # For square images only ( as inputs.shape[ 1 ] = inputs.shape[ 2 ] )
+    input_image_size = inputs.shape[ 1 ]
+    for i in range( 0 , input_image_size , self.patch_size ):
+        for j in range( 0 , input_image_size , self.patch_size ):
+            patches.append( inputs[ : , i : i + self.patch_size , j : j + self.patch_size , : ] )
+    return patches
+
+class PatchEncoder(tf.keras.layers.Layer):
+    def __init__(self, num_patches, projection_dim):
+        super(PatchEncoder, self).__init__()
+        self.num_patches = num_patches
+        self.projection = tf.keras.layers.Dense(units=projection_dim)
+        self.position_embedding = tf.keras.layers.Embedding(
+            input_dim=num_patches, output_dim=projection_dim
+        )
+
+    def call(self, patch):
+        positions = tf.range(start=0, limit=self.num_patches, delta=1)
+        encoded = self.projection(patch) + self.position_embedding(positions)
+        return encoded
+
+def patches(learning_rate, n_classes,fine_tune=0):
+    inputs = tf.keras.layers.Input(shape=(224, 224, 3))
+    patches = CreatePatches(patch_size=128)(inputs)
+    capa = tf.keras.models.Model(inputs, patches)
+    model = tf.keras.Sequential([
+            Conv2D(filters=32, kernel_size=(3, 3), activation='relu', padding='same', input_shape=(224, 224, 3)),
+            MaxPool2D(pool_size=(2, 2), strides=2),
+            Conv2D(filters=64, kernel_size=(3, 3), activation='relu', padding='same'),
+            MaxPool2D(pool_size=(2, 2), strides=2),
+            Flatten(),
+            Dense(units=n_classes, activation='softmax')
+    ])
+    #model.build(input_shape=(224, 224, 4))
+    model.add(capa)
+    model.compile(optimizer=Adam(learning_rate=learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
+    model.summary()
+    return model
+
+def xception(learning_rate, n_classes,fine_tune=0):
+    xception_model = Xception()
+
+    model = Sequential()
+    # for layer in xception_model.layers[:-1]:
+    #     model.add(layer)
+    # for layer in model.layers:
+    #     layer.trainable = False
+
+    # if fine_tune > 0:
+    #     for layer in model.layers[:-fine_tune]:
+    #         layer.trainable = False
+    # else:
+    #     for layer in model.layers:
+    #         layer.trainable = False
+
+    model.add(xception_model)
+    model.add(Dense(units=n_classes, activation='softmax'))
+    model.compile(optimizer=Adam(learning_rate=learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
+    model.summary()
+    return model
+
+def build_model(learning_rate, n_classes,fine_tune,model_name,input_shape):
     if model_name == "vgg16":
-        return VGG16_model2(learning_rate, n_classes,fine_tune)
+        return VGG16_model(learning_rate, n_classes,fine_tune,input_shape)
     elif model_name == "mobile_net":
         return mobile_net_model(learning_rate, n_classes,fine_tune)
     elif model_name == "conv":
         return conv_model(learning_rate, n_classes,fine_tune)
+    elif model_name == "patches":
+        return patches(learning_rate, n_classes,fine_tune)
+    elif model_name == "xception":
+        return xception(learning_rate, n_classes,fine_tune)
     else:
-        return VGG16_model2(learning_rate, n_classes,fine_tune)
+        return VGG16_model2(learning_rate, n_classes,fine_tune,input_shape)

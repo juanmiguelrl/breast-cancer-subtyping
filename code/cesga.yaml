@@ -1,0 +1,17 @@
+authorName: jm
+experimentName: testing_rnn
+trialConcurrency: 1
+maxExecDuration: 100h
+maxTrialNum: 5000
+trainingServicePlatform: local
+searchSpacePath: ./nni/search_space.json
+useAnnotation: false
+tuner:
+  builtinTunerName: TPE
+  classArgs:
+    optimize_mode: maximize
+trial:
+  command: python main.py --j "nni.json" --t --nni
+  codeDir: .
+localConfig:
+  useActiveGpu: true
