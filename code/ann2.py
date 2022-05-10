@@ -147,7 +147,7 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
     )
 
     #test_acc = test(args, model, device, test_loader)
-    test_acc = model.evaluate(validation_generator)
+    _,test_acc = model.evaluate(validation_generator)
     print("Test accuracy:", test_acc)
     nni.report_final_result(test_acc)
 
