@@ -45,11 +45,19 @@ if __name__ == '__main__':
         print("dowsncaling...")
         image_preprocess.downscale_from_manifest(PARAMS["downscale"]["manifest_path"], PARAMS["downscale"]["svsdirectory"], PARAMS["downscale"]["outputDirectory"], PARAMS["downscale"]["scale"],PARAMS["downscale"]["windows"])
     if args.s:
-        print("resizing, cropping and storing images together...")
+        print("storing images together...")
         store_images.store_images_together(PARAMS["store"]["destination_path"], PARAMS["store"]["input_dir"])
     if args.f:
+        #default values for the filter
+        filter = {"resize_size": (896,896) ,"only_tissue":True,"canny":False,"discard":True,"crop":True,
+                  "resize":True,"remove_blue_pen":False,"remove_red_pen":False,"remove_green_pen":False,"only_one_tissue":True,"empty_threshold":0.5,
+                  "canny_params":{"sigma":1.0,"low_threshold":0,"high_threshold":25}}
+        filter.update(PARAMS["filter"])
         print("filtering images...")
-        filters.filter_images(PARAMS["filter"]["input_dir"], PARAMS["filter"]["destination_path"], PARAMS["filter"]["prefix"], PARAMS["filter"]["resize_size"])
+        filters.filter_images(filter["input_dir"], filter["destination_path"], filter["resize_size"],
+                              filter["only_tissue"],filter["canny"],filter["discard"],filter["crop"],
+                              filter["resize"],filter["remove_blue_pen"],filter["remove_red_pen"],filter["remove_green_pen"],
+                              filter["only_one_tissue"],filter["empty_threshold"],filter["canny_params"])
     if args.c:
         print("clasifying images...")
         clasify.clasify_images(PARAMS["clasify"]["input"], PARAMS["clasify"]["imgdir"], PARAMS["clasify"]["sourceDir"], PARAMS["clasify"]["newDirTOsplitImages"],PARAMS["classification"])

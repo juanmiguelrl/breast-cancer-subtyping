@@ -9,6 +9,7 @@ import scipy.ndimage.morphology as sc_morph
 from PIL import Image
 import math
 import os
+import skimage.feature as sk_feature
 
 #to store all the reduced images in one folder (to revise them visually without going through a lot of folders)    
 
@@ -251,6 +252,124 @@ def filter_blue(rgb, red_upper_thresh, green_upper_thresh, blue_lower_thresh, ou
     result = result.astype("uint8") * 255
   return result
 
+
+def filter_green(rgb, red_upper_thresh, green_lower_thresh, blue_lower_thresh, output_type="bool"):
+
+  r = rgb[:, :, 0] < red_upper_thresh
+  g = rgb[:, :, 1] > green_lower_thresh
+  b = rgb[:, :, 2] > blue_lower_thresh
+  result = ~(r & g & b)
+  if output_type == "bool":
+    pass
+  elif output_type == "float":
+    result = result.astype(float)
+  else:
+    result = result.astype("uint8") * 255
+
+  return result
+
+def filter_green_pen(rgb, output_type="bool"):
+
+  result = filter_green(rgb, red_upper_thresh=150, green_lower_thresh=160, blue_lower_thresh=140) & \
+           filter_green(rgb, red_upper_thresh=70, green_lower_thresh=110, blue_lower_thresh=110) & \
+           filter_green(rgb, red_upper_thresh=45, green_lower_thresh=115, blue_lower_thresh=100) & \
+           filter_green(rgb, red_upper_thresh=30, green_lower_thresh=75, blue_lower_thresh=60) & \
+           filter_green(rgb, red_upper_thresh=195, green_lower_thresh=220, blue_lower_thresh=210) & \
+           filter_green(rgb, red_upper_thresh=225, green_lower_thresh=230, blue_lower_thresh=225) & \
+           filter_green(rgb, red_upper_thresh=170, green_lower_thresh=210, blue_lower_thresh=200) & \
+           filter_green(rgb, red_upper_thresh=20, green_lower_thresh=30, blue_lower_thresh=20) & \
+           filter_green(rgb, red_upper_thresh=50, green_lower_thresh=60, blue_lower_thresh=40) & \
+           filter_green(rgb, red_upper_thresh=30, green_lower_thresh=50, blue_lower_thresh=35) & \
+           filter_green(rgb, red_upper_thresh=65, green_lower_thresh=70, blue_lower_thresh=60) & \
+           filter_green(rgb, red_upper_thresh=100, green_lower_thresh=110, blue_lower_thresh=105) & \
+           filter_green(rgb, red_upper_thresh=165, green_lower_thresh=180, blue_lower_thresh=180) & \
+           filter_green(rgb, red_upper_thresh=140, green_lower_thresh=140, blue_lower_thresh=150) & \
+           filter_green(rgb, red_upper_thresh=185, green_lower_thresh=195, blue_lower_thresh=195)
+  if output_type == "bool":
+    pass
+  elif output_type == "float":
+    result = result.astype(float)
+  else:
+    result = result.astype("uint8") * 255
+
+  return result
+
+
+def filter_blue(rgb, red_upper_thresh, green_upper_thresh, blue_lower_thresh, output_type="bool"):
+
+  r = rgb[:, :, 0] < red_upper_thresh
+  g = rgb[:, :, 1] < green_upper_thresh
+  b = rgb[:, :, 2] > blue_lower_thresh
+  result = ~(r & g & b)
+  if output_type == "bool":
+    pass
+  elif output_type == "float":
+    result = result.astype(float)
+  else:
+    result = result.astype("uint8") * 255
+
+  return result
+
+def filter_blue_pen(rgb, output_type="bool"):
+
+  result = filter_blue(rgb, red_upper_thresh=60, green_upper_thresh=120, blue_lower_thresh=190) & \
+           filter_blue(rgb, red_upper_thresh=120, green_upper_thresh=170, blue_lower_thresh=200) & \
+           filter_blue(rgb, red_upper_thresh=175, green_upper_thresh=210, blue_lower_thresh=230) & \
+           filter_blue(rgb, red_upper_thresh=145, green_upper_thresh=180, blue_lower_thresh=210) & \
+           filter_blue(rgb, red_upper_thresh=37, green_upper_thresh=95, blue_lower_thresh=160) & \
+           filter_blue(rgb, red_upper_thresh=30, green_upper_thresh=65, blue_lower_thresh=130) & \
+           filter_blue(rgb, red_upper_thresh=130, green_upper_thresh=155, blue_lower_thresh=180) & \
+           filter_blue(rgb, red_upper_thresh=40, green_upper_thresh=35, blue_lower_thresh=85) & \
+           filter_blue(rgb, red_upper_thresh=30, green_upper_thresh=20, blue_lower_thresh=65) & \
+           filter_blue(rgb, red_upper_thresh=90, green_upper_thresh=90, blue_lower_thresh=140) & \
+           filter_blue(rgb, red_upper_thresh=60, green_upper_thresh=60, blue_lower_thresh=120) & \
+           filter_blue(rgb, red_upper_thresh=110, green_upper_thresh=110, blue_lower_thresh=175)
+  if output_type == "bool":
+    pass
+  elif output_type == "float":
+    result = result.astype(float)
+  else:
+    result = result.astype("uint8") * 255
+
+  return result
+
+def filter_rgb_to_grayscale(np_img, output_type="uint8"):
+  """
+  Convert an RGB NumPy array to a grayscale NumPy array.
+  Shape (h, w, c) to (h, w).
+  Args:
+    np_img: RGB Image as a NumPy array.
+    output_type: Type of array to return (float or uint8)
+  Returns:
+    Grayscale image as NumPy array with shape (h, w).
+  """
+  # Another common RGB ratio possibility: [0.299, 0.587, 0.114]
+  grayscale = np.dot(np_img[..., :3], [0.2125, 0.7154, 0.0721])
+  if output_type != "float":
+    grayscale = grayscale.astype("uint8")
+  return grayscale
+
+def filter_canny(np_img, sigma=1, low_threshold=0, high_threshold=25, output_type="uint8"):
+  """
+  Filter image based on Canny algorithm edges.
+  Args:
+    np_img: Image as a NumPy array.
+    sigma: Width (std dev) of Gaussian.
+    low_threshold: Low hysteresis threshold value.
+    high_threshold: High hysteresis threshold value.
+    output_type: Type of array to return (bool, float, or uint8).
+  Returns:
+    NumPy array (bool, float, or uint8) representing Canny edge map (binary image).
+  """
+  can = sk_feature.canny(np_img, sigma=sigma, low_threshold=low_threshold, high_threshold=high_threshold)
+  if output_type == "bool":
+    pass
+  elif output_type == "float":
+    can = can.astype(float)
+  else:
+    can = can.astype("uint8") * 255
+  return can
+
 ###############################################
 from skimage.measure import label
 def getLargestCC(segmentation):
@@ -261,13 +380,13 @@ def getLargestCC(segmentation):
 
 ###############################################
 
-def is_empty_area(result,mask):
+def is_empty_area(result,mask,threshold=0.5):
   #checks if the gray area is a big part of the image by comparing the area of the image and the area of the gray area
   gray_mask = filter_grays(result)
   gray_area = gray_mask.sum()
   img_area = mask.sum()
   gray_area_ratio = gray_area/img_area
-  if gray_area_ratio < 0.5:
+  if gray_area_ratio < threshold:
     return True,gray_area_ratio
   else:
     return False,gray_area_ratio
@@ -275,16 +394,16 @@ def is_empty_area(result,mask):
 
 
 
-def mask(img):
-    img = np.asarray(Image.open(img))
+def mask(img,remove_blue,remove_red,remove_green,only_one,empty_threshold):
     #rgb = util.pil_to_np_rgb(img)
     #grayscale = filter.filter_rgb_to_grayscale(rgb)
 
-    green_mask = filter_green_channel(img)
+    #green_mask = filter_green_channel(img)
     gray_mask = filter_grays(img)
     red_mask = filter_red(img, red_lower_thresh = 180, green_upper_thresh=80, blue_upper_thresh=90)
-    #blue_mask = filter_blue(img)
-    color_mask = green_mask & gray_mask & red_mask
+    green_mask = filter_green_pen(img)
+    blue_mask = filter_blue_pen(img)
+    color_mask = green_mask & gray_mask & red_mask & blue_mask
 
     #mask = img.copy()
     mask = filter_binary_dilation(color_mask)
@@ -292,13 +411,21 @@ def mask(img):
     mask = filter_remove_small_objects(mask, min_size=100000)
     mask = filter_binary_fill_holes(mask)
 
+
     #result = img * np.dstack([mask, mask, mask])
     print("the percentage of the image that is masked is: ", mask_percent(mask))
 
-    mask = getLargestCC(mask)
+    if only_one:
+        mask = getLargestCC(mask)
+    if remove_blue:
+        mask = mask & blue_mask
+    if remove_red:
+        mask = mask & red_mask
+    if remove_green:
+        mask = mask & green_mask
     result = img * np.dstack([mask, mask, mask])
     print("the percentage of the biggest connected component that is masked is: ", mask_percent(mask))
-    check,ratio = is_empty_area(result, mask)
+    check,ratio = is_empty_area(result, mask,empty_threshold)
     if check:
       print("the area of the masked area is empty: ", ratio)
       return result,False
@@ -339,27 +466,44 @@ def crop_resize_image(original_image,resize_size):
         #shutil.copy(img, destination_path+"\\"+get_filename(img))
 ################################################
 
-def mask_list(input_dir,destination_path,prefix,resize_size):
+def mask_list(input_dir,destination_path,resize_size,only_tissue,canny,discard,crop,resize,
+              remove_blue,remove_red,remove_green,only_one,empty_threshold,canny_params):
     for img in glob.glob(input_dir):
       #check if is an file
       if os.path.isfile(img):
-        result,check = mask(img)
-        np_img = Image.fromarray(result)
-        np_img = crop_resize_image(np_img,resize_size)
+        np_img = np.asarray(Image.open(img).convert('RGB'))
+        if canny:
+          canny_result = filter_canny(filter_rgb_to_grayscale(np_img),canny_params["sigma"],canny_params["low_threshold"],canny_params["high_threshold"],output_type="bool")
+          np_img = np_img * np.dstack([~canny_result, ~canny_result, ~canny_result])
+        if only_tissue:
+          result,check = mask(np_img,remove_blue,remove_red,remove_green,only_one,empty_threshold)
+          np_img = result
+        else:
+            check = True
+            np_img = np.asarray(Image.open(img))
+        np_img = Image.fromarray(np_img)
+        if crop:
+          np_img = np_img.crop(np_img.getbbox())
+        if resize:
+          np_img = np_img.resize(resize_size)
+        #np_img = crop_resize_image(np_img,resize_size)
         if np_img.mode == 'L':
           np_img = np_img.convert('RGB')
-        if check:
+        if check or not discard:
           #np_img.show()
-          np_img.save(destination_path+remove_suffix(remove_prefix(img,prefix),".png")+".png")
+          np_img.save(destination_path+remove_suffix(remove_prefix(img,input_dir.rsplit('\\', 1)[0]),".png")+".png")
         else:
           #np_img.show()
-          np_img.save(destination_path+remove_suffix("/discarded/"+remove_prefix(img,prefix),".png")+".png")
+          np_img.save(destination_path+remove_suffix("/discarded/"+remove_prefix(img,input_dir.rsplit('\\', 1)[0]),".png")+".png")
 
-def filter_images(input_dir,destination_path,prefix,resize_size):
+def filter_images(input_dir,destination_path,resize_size=(896,896),only_tissue=True,canny=False,discard=True,crop=True,
+                  resize=True,remove_blue=False,remove_red=False,remove_green=False,only_one=True,empty_threshold=0.5,
+                  canny_params={}):
   if not os.path.exists(remove_prefix(destination_path,"/")):
       os.makedirs(remove_prefix(destination_path,"/"))
 
   if not os.path.exists(destination_path+"/discarded"):
       os.makedirs(destination_path+"/discarded")
 
-  mask_list(input_dir,destination_path,prefix,resize_size)
+  mask_list(input_dir,destination_path,resize_size,only_tissue,canny,discard,crop,resize,remove_blue,remove_red,remove_green,
+            only_one,empty_threshold,canny_params)
