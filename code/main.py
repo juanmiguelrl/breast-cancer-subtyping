@@ -1,5 +1,5 @@
 import argparse
-import image_preprocess, store_images, filters, clasify, ann2, eval
+import image_preprocess, store_images, filters, clasify, ann2, eval, download_manifest
 import json
 from datetime import datetime
 import nni
@@ -22,6 +22,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=5)
     parser.add_argument('--batch_size', type=int, default=2048)
     parser.add_argument('--n_gpus', type=int, default=1)
+    parser.add_argument("--m", help="download manifest from GDC", required=False, default=False, action="store_true")
     parser.add_argument("--d", help="downscale wsi images", required=False, default=False, action="store_true")
     parser.add_argument("--s", help="store images together", required=False, default=False, action="store_true")
     parser.add_argument("--f", help="filter the images", required=False, default=False, action="store_true")
@@ -41,6 +42,11 @@ if __name__ == '__main__':
     if args.n:
         PARAMS = nni_params(PARAMS)
 
+    if args.m:
+        #default values for the manifest
+        manifest = {"projects": ["TCGA-BRCA"], "name_restrictions": ["*"],"endpoint": 'https://api.gdc.cancer.gov/files'}
+        manifest.update(PARAMS["manifest"])
+        download_manifest.download_manifest_from_GDC(manifest["output_file"],manifest["projects"],manifest["name_restrictions"],manifest["endpoint"])
     if args.d:
         print("dowsncaling...")
         image_preprocess.downscale_from_manifest(PARAMS["downscale"]["manifest_path"], PARAMS["downscale"]["svsdirectory"], PARAMS["downscale"]["outputDirectory"], PARAMS["downscale"]["scale"],PARAMS["downscale"]["windows"])

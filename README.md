@@ -7,6 +7,15 @@ module load gcccore/6.4.0 gdc-client/1.3.0-python-2.7.15
 After the download, all that has to be done is prepare a json file with the parameters needed at main.py
 (json file explanation uncompleted at the moment)  
 ## json
+
+### Manifest download options (manifest):  
+Compulsory:  
+output_file : the path where the manifest will be stored  
+Optional:  
+projects : list with the projects to search for the query (has the project TCGA-BRCA as default)  
+name_restrictions : List with restrictions for the name of the slides searched (for example ["\*TS\*"] will search for the files which contains TS in their names)  
+endpoint : the endpoint where the query request will be sent, it should not be necessary to modify it (as default it has https://api.gdc.cancer.gov/files)  
+
 ### Preprocess options in json (filter):  
 Compulsory:  
 input_dir : directory path with the images to preprocess (written in the format "directory\\*")  
