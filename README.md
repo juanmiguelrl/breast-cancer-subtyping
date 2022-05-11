@@ -6,10 +6,12 @@ module load gcccore/6.4.0 gdc-client/1.3.0-python-2.7.15
 
 After the download, all that has to be done is prepare a json file with the parameters needed at main.py
 (json file explanation uncompleted at the moment)  
-
-Preprocess options in json (filter):  
+## json
+### Preprocess options in json (filter):  
+Compulsory:  
 input_dir : directory path with the images to preprocess (written in the format "directory\\*")  
 destination_path : directory path to store the preprocessed images  
+Optional:  
 resize: bool to resize the image or not  
 resize_size : the new size of the image after being resized if the resize bool is set to true  
 only_tissue : bool if it is wanted to preprocess the image but without eliminating the non tissue part or not  
@@ -24,7 +26,7 @@ remove_green_pen : bool to indicate if remove the green pen marks in the slides 
 only_one_tissue : bool to indicate if leave only the biggest tissue connected component or leave all  
 
 
-Program options:  
+## Program options:  
 (Options described in order, all of them need to be executed at least once in order to be able to use the next one)  
 --d : to downscale the wsi files  
 --s : to store the images together  
