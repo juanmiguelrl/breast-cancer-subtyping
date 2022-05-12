@@ -58,6 +58,7 @@ only_one_tissue : bool to indicate if leave only the biggest tissue connected co
 --epochs : to indicate the number of epochs that will be done at the training  
 --batch _size: to indicate the batch size at the training  
 --n_gpus: to indicate how many gpus will be used during the training  
+(These next options are optional for the training option):  
 --l : to log during the training or not  
 --n or --nni : to use nni or not during the training
 
