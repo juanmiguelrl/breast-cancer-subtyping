@@ -16,7 +16,7 @@ projects : list with the projects to search for the query (has the project TCGA-
 name_restrictions : List with restrictions for the name of the slides searched (for example ["\*TS\*"] will search for the files which contains TS in their names)  
 endpoint : the endpoint where the query request will be sent, it should not be necessary to modify it (as default it has https://api.gdc.cancer.gov/files)  
 
-### Slides download options (slides): 
+### Slides download options (slides) (it requires the gdc-downloader program): 
 Compulsory:  
 manifest_file : The path to the manifest file  
 output_dir : The path where the slides will be downloaded  
