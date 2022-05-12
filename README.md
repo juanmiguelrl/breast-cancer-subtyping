@@ -16,6 +16,15 @@ projects : list with the projects to search for the query (has the project TCGA-
 name_restrictions : List with restrictions for the name of the slides searched (for example ["\*TS\*"] will search for the files which contains TS in their names)  
 endpoint : the endpoint where the query request will be sent, it should not be necessary to modify it (as default it has https://api.gdc.cancer.gov/files)  
 
+### Slides download options (slides): 
+Compulsory:  
+manifest_file : The path to the manifest file  
+output_dir : The path where the slides will be downloaded  
+Optional:  
+executable : To indicate if the gdc-client is an executable program in a path to indicate  
+executable_path_file : The path where the gdc-client is  
+command_for_gdc_client : The command for the gdc-client in case it can be called directly
+
 ### Preprocess options in json (filter):  
 Compulsory:  
 input_dir : directory path with the images to preprocess (written in the format "directory\\*")  

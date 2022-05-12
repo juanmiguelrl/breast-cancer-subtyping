@@ -79,3 +79,24 @@ def download_manifest_from_GDC(output_file,projects,name_restrictions,endpoint='
     data = data.reindex(columns=column_names)
     data.to_csv(output_file, sep="\t")
     return
+
+def download_images_from_manifest(manifest_file,output_dir,executable=False,executable_path_file=None,command_for_gdc_client="gdc-client"):
+    """ Download images from manifest file
+        calling the gdc transfer tool
+    """
+    import subprocess
+    import os
+    if not executable:
+        executable_path_file = "gdc-client"
+        exec_name = command_for_gdc_client
+    else:
+        path = executable_path_file.rsplit('\\',1)[0]
+        path.replace("\\", "/")
+        os.chdir(path)
+        print(os.getcwd())
+        exec_name = executable_path_file.rsplit('\\')[-1]
+    #print("\""+exec_name+"\"" + " download " + " -m", manifest_file, " -d", output_dir)
+    print([exec_name, "download", "-m", manifest_file.replace("\\", "/"), "-d", output_dir.replace("\\", "/")])
+    pipe = subprocess.run([exec_name, "download" , "-m", manifest_file.replace("\\", "/"), "-d", output_dir.replace("\\", "/")],shell=True)
+    #text = pipe.communicate()[0]
+    #print(text)
