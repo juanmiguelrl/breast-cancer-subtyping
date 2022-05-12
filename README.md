@@ -46,9 +46,11 @@ only_one_tissue : bool to indicate if leave only the biggest tissue connected co
 
 ## Program options:  
 (Options described in order, all of them need to be executed at least once in order to be able to use the next one)  
+--m : download manifest from GDC
+--dl : download slides from a manifest file using the gdc-client program
 --d : to downscale the wsi files  
 --s : to store the images together  
---f : filters the images, crops them to take only one tissue sample and rescales them to the desired size  
+--f : filters the images applying the options indicated
 --c : clasifies the images and slits them in train and test sets  
 --t : this option os to execute the training of the neural network  
 --e : to evaluate the model indicated with the dataset indicated  
@@ -56,4 +58,6 @@ only_one_tissue : bool to indicate if leave only the biggest tissue connected co
 --epochs : to indicate the number of epochs that will be done at the training  
 --batch _size: to indicate the batch size at the training  
 --n_gpus: to indicate how many gpus will be used during the training  
+--l : to log during the training or not  
+--n or --nni : to use nni or not during the training
 

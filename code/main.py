@@ -23,17 +23,17 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int, default=2048)
     parser.add_argument('--n_gpus', type=int, default=1)
     parser.add_argument("--m", help="download manifest from GDC", required=False, default=False, action="store_true")
-    parser.add_argument("--dl", help="download slides using a manifest file", required=False, default=False, action="store_true")
+    parser.add_argument("--dl", help="download slides from a manifest file using the gdc-client program", required=False, default=False, action="store_true")
     parser.add_argument("--d", help="downscale wsi images", required=False, default=False, action="store_true")
     parser.add_argument("--s", help="store images together", required=False, default=False, action="store_true")
-    parser.add_argument("--f", help="filter the images", required=False, default=False, action="store_true")
-    parser.add_argument("--c", help="clasify the images and split them in train and test sets", required=False,
+    parser.add_argument("--f", help="filters the images applying the options indicated", required=False, default=False, action="store_true")
+    parser.add_argument("--c", help="clasifies the images and slits them in train and test sets ", required=False,
                         default=False, action="store_true")
-    parser.add_argument("--t", help="trains the network", required=False, default=False, action="store_true")
-    parser.add_argument("--e", help="evaluate the model", required=False, default=False, action="store_true")
+    parser.add_argument("--t", help="execute the training of the neural network", required=False, default=False, action="store_true")
+    parser.add_argument("--e", help="evaluate the model indicated with the dataset indicated", required=False, default=False, action="store_true")
     parser.add_argument("--j", help="json file with the variables", required=True)
     parser.add_argument("--l", help="to log during the training or not", required=False, default=False, action="store_true")
-    parser.add_argument("--n","--nni", help="to use nni or not", required=False, default=False, action="store_true")
+    parser.add_argument("--n","--nni", help="to use nni or not during the training", required=False, default=False, action="store_true")
 
     args = parser.parse_args()
     print(args)
