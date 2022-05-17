@@ -1,5 +1,5 @@
 import argparse
-import image_preprocess, store_images, filters, clasify, ann2, eval, download_manifest
+import image_preprocess, store_images, filters, clasify, ann2, eval, util
 import json
 from datetime import datetime
 import nni
@@ -52,7 +52,7 @@ if __name__ == '__main__':
         manifest = {"projects": ["TCGA-BRCA"], "name_restrictions": ["*"],"files_data_format": ["svs"],
                     "experimental_strategy":["*"] ,"endpoint": 'https://api.gdc.cancer.gov/files'}
         manifest.update(PARAMS["manifest"])
-        download_manifest.download_manifest_from_GDC(manifest["output_file"],manifest["projects"],manifest["name_restrictions"],manifest["files_data_format"],
+        util.download_manifest_from_GDC(manifest["output_file"],manifest["projects"],manifest["name_restrictions"],manifest["files_data_format"],
                                                      manifest["experimental_strategy"],manifest["endpoint"])
     if args.cl:
         #default values for the clinical
@@ -61,24 +61,24 @@ if __name__ == '__main__':
                     "fields_dictionary":{"stage":"diagnoses.0.ajcc_pathologic_stage","icd_10_code":"diagnoses.0.icd_10_code"},
                     "endpoint": 'https://api.gdc.cancer.gov/cases'}
         clinical.update(PARAMS["clinical"])
-        download_manifest.download_data(clinical["output_file"],clinical["manifest_path"],clinical["projects"],clinical["name_restrictions"],
+        util.download_data(clinical["output_file"],clinical["manifest_path"],clinical["projects"],clinical["name_restrictions"],
                                                      clinical["fields_dictionary"],clinical["experimental_strategy"],
                                                      clinical["expand"],clinical["files_data_format"],clinical["endpoint"])
     if args.dr:
         #default values for the r_donwload
         r_donwload = {"r_path": "","arguments":[]}
         r_donwload.update(PARAMS["r_donwload"])
-        download_manifest.download_data_with_R(r_donwload["executable"],r_donwload["r_path"],r_donwload["r_script_path"],r_donwload["arguments"])
+        util.download_data_with_R(r_donwload["executable"],r_donwload["r_path"],r_donwload["r_script_path"],r_donwload["arguments"])
     if args.jd:
         #default values for the jd_donwload
         #join_data = {}
         #join_data.update(PARAMS["join_data"])
-        download_manifest.join_data(PARAMS["join_data"])
+        util.join_data(PARAMS["join_data"])
     if args.dl:
         #default values for the slides
         slides = {"executable": False, "executable_path_file": None,"command_for_gdc_client" : "gdc-client"}
         slides.update(PARAMS["slides"])
-        download_manifest.download_images_from_manifest(slides["manifest_file"],slides["output_dir"],slides["executable"],slides["executable_path_file"],slides["command_for_gdc_client"])
+        util.download_images_from_manifest(slides["manifest_file"],slides["output_dir"],slides["executable"],slides["executable_path_file"],slides["command_for_gdc_client"])
 
     if args.d:
         print("dowsncaling...")
