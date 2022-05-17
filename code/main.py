@@ -23,6 +23,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int, default=2048)
     parser.add_argument('--n_gpus', type=int, default=1)
     parser.add_argument("--m", help="download manifest from GDC", required=False, default=False, action="store_true")
+    parser.add_argument("--cl", help="download clinical from GDC", required=False, default=False, action="store_true")
     parser.add_argument("--dl", help="download slides from a manifest file using the gdc-client program", required=False, default=False, action="store_true")
     parser.add_argument("--d", help="downscale wsi images", required=False, default=False, action="store_true")
     parser.add_argument("--s", help="store images together", required=False, default=False, action="store_true")
@@ -45,9 +46,22 @@ if __name__ == '__main__':
 
     if args.m:
         #default values for the manifest
-        manifest = {"projects": ["TCGA-BRCA"], "name_restrictions": ["*"],"endpoint": 'https://api.gdc.cancer.gov/files'}
+        #if it is wanted to not apply a filter its value has to be passed as ["*"] and the API will interpret it as any value is valid for that field
+        manifest = {"projects": ["TCGA-BRCA"], "name_restrictions": ["*"],"files_data_format": ["svs"],
+                    "experimental_strategy":["*"] ,"endpoint": 'https://api.gdc.cancer.gov/files'}
         manifest.update(PARAMS["manifest"])
-        download_manifest.download_manifest_from_GDC(manifest["output_file"],manifest["projects"],manifest["name_restrictions"],manifest["endpoint"])
+        download_manifest.download_manifest_from_GDC(manifest["output_file"],manifest["projects"],manifest["name_restrictions"],manifest["files_data_format"],
+                                                     manifest["experimental_strategy"],manifest["endpoint"])
+    if args.cl:
+        #default values for the clinical
+        clinical = {"projects": ["TCGA-BRCA"], "name_restrictions": ["*"],"files_data_format": ["svs"],
+                    "experimental_strategy":["*"] ,"expand":["diagnoses","samples","files"],
+                    "fields_dictionary":{"stage":"diagnoses.0.ajcc_pathologic_stage","icd_10_code":"diagnoses.0.icd_10_code"},
+                    "endpoint": 'https://api.gdc.cancer.gov/cases'}
+        clinical.update(PARAMS["clinical"])
+        download_manifest.download_data(clinical["output_file"],clinical["manifest_path"],clinical["projects"],clinical["name_restrictions"],
+                                                     clinical["fields_dictionary"],clinical["experimental_strategy"],
+                                                     clinical["expand"],clinical["files_data_format"],clinical["endpoint"])
     if args.dl:
         #default values for the slides
         slides = {"executable": False, "executable_path_file": None,"command_for_gdc_client" : "gdc-client"}

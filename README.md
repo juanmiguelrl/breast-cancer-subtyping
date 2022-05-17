@@ -14,7 +14,24 @@ output_file : the path where the manifest will be stored
 Optional:  
 projects : list with the projects to search for the query (has the project TCGA-BRCA as default)  
 name_restrictions : List with restrictions for the name of the slides searched (for example ["\*TS\*"] will search for the files which contains TS in their names)  
+files_data_format : the data format which is wanted for the files (svs as default)  
+experimental_strategy : the experimental strategy of the files  
 endpoint : the endpoint where the query request will be sent, it should not be necessary to modify it (as default it has https://api.gdc.cancer.gov/files)  
+
+### GDC data download options (manifest):
+Compulsory:  
+output_file : the path where the output will be stored  
+manifest_path : the path where the manifest file is stored  
+Optional:  
+projects : list with the projects to search for the query (has the project TCGA-BRCA as default)  
+name_restrictions : List with restrictions for the name of the slides searched (for example ["\*TS\*"] will search for the files which contains TS in their names)  
+files_data_format : the data format which is wanted for the files (svs as default)   
+experimental_strategy : the experimental strategy of the files  
+expand : expand indicated to the API (as default has ["diagnoses","samples","files"])   
+endpoint : the endpoint where the query request will be sent, it should not be necessary to modify it (as default it has https://api.gdc.cancer.gov/cases)  
+
+Info about the GDC API at: https://docs.gdc.cancer.gov/API/Users_Guide/Getting_Started/ and notebook with GDC API examples at https://github.com/NCI-GDC/gdc-docs/blob/develop/Notebooks/API_April_2021/Webinar_April_2021.ipynb
+
 
 ### Slides download options (slides) (it requires the gdc-downloader program): 
 Compulsory:  
@@ -45,12 +62,14 @@ only_one_tissue : bool to indicate if leave only the biggest tissue connected co
 
 
 ## Program options:  
+--j : followed by the json file path with the program configuration (needed for the different options of the program to work correctly)  
 (Options described in order, all of them need to be executed at least once in order to be able to use the next one)  
---m : download manifest from GDC
---dl : download slides from a manifest file using the gdc-client program
+--m : download manifest from GDC  
+--cl : download additional data from GDC  
+--dl : download slides from a manifest file using the gdc-client program  
 --d : to downscale the wsi files  
 --s : to store the images together  
---f : filters the images applying the options indicated
+--f : filters the images applying the options indicated  
 --c : clasifies the images and slits them in train and test sets  
 --t : this option os to execute the training of the neural network  
 --e : to evaluate the model indicated with the dataset indicated  
