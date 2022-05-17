@@ -26,6 +26,7 @@ if __name__ == '__main__':
     parser.add_argument("--cl", help="download clinical from GDC", required=False, default=False, action="store_true")
     parser.add_argument("--dl", help="download slides from a manifest file using the gdc-client program", required=False, default=False, action="store_true")
     parser.add_argument("--dr", help="download data using a R script",required=False, default=False, action="store_true")
+    parser.add_argument("--jd", help="joins the dataframes indicated", required=False, default=False,action="store_true")
     parser.add_argument("--d", help="downscale wsi images", required=False, default=False, action="store_true")
     parser.add_argument("--s", help="store images together", required=False, default=False, action="store_true")
     parser.add_argument("--f", help="filters the images applying the options indicated", required=False, default=False, action="store_true")
@@ -68,6 +69,11 @@ if __name__ == '__main__':
         r_donwload = {"r_path": "","arguments":[]}
         r_donwload.update(PARAMS["r_donwload"])
         download_manifest.download_data_with_R(r_donwload["executable"],r_donwload["r_path"],r_donwload["r_script_path"],r_donwload["arguments"])
+    if args.jd:
+        #default values for the jd_donwload
+        #join_data = {}
+        #join_data.update(PARAMS["join_data"])
+        download_manifest.join_data(PARAMS["join_data"])
     if args.dl:
         #default values for the slides
         slides = {"executable": False, "executable_path_file": None,"command_for_gdc_client" : "gdc-client"}

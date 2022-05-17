@@ -41,6 +41,18 @@ Optional:
 r_path : personalised path to call R  
 arguments : arguments to pass to the R script  
 
+### join dataframes options (--jd):
+Compulsory:  
+join_data : List of dictionaries containing each one the two dataframes that want to be joined, these dictionaries contain :  
+&emsp; df1_path : Path of the first dataframe to join  
+&emsp; df2 path : Path of the second dataframe to join  
+&emsp; sep1 : The separator used in the firs dataframe  
+&emsp; sep2 : The separator used in the second dataframe  
+&emsp; join type : The join type which will be used (it uses pandas.Dataframe.merge, so the same joins options are available: ‘left’, ‘right’, ‘outer’, ‘inner’, ‘cross’)  
+&emsp; left_on : The column name which will be used to join on in the first dataframe  
+&emsp; right_on : The column name which will be used to join on in the second dataframe 
+&emsp; output_file : The path for storing the resulting dataframe
+
 ### Slides download options (--dl) (it requires the gdc-downloader program): 
 Compulsory:  
 manifest_file : The path to the manifest file  

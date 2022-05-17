@@ -198,3 +198,14 @@ def download_images_from_manifest(manifest_file,output_dir,executable=False,exec
     #text = pipe.communicate()[0]
     #print(text)
 
+def join_data(data):
+    """ Join dataframes
+    """
+    for element in data:
+        df1 = pd.read_csv(element["df1_path"],sep=element["sep1"])
+        df2 = pd.read_csv(element["df2_path"],sep=element["sep2"])
+        df = pd.merge(df1,df2,left_on=element["left_on"],right_on=element["right_on"],how=element["join_type"])
+        df.to_csv(element["output_file"],sep="\t",index=False)
+    return df
+
+#pd.merge(data, pam50[["BRCA_Subtype_PAM50"]], left_on="case_submitter_id",right_on="patient", right_index=True,how="left")
