@@ -164,6 +164,19 @@ def download_data(output_file, manifest_path, projects, name_restrictions, field
     definitive.to_csv(output_file, sep="\t",index=False)
     return definitive
 
+def download_data_with_R(executable,r_path,r_script_path,arguments):
+    """ Download data using R
+    """
+    import subprocess
+    import os
+    if executable:
+        exec_name = r_path
+    else:
+        exec_name = "Rscript"
+    print([exec_name, r_script_path.replace("\\", "/")])
+    pipe = subprocess.run([exec_name, r_script_path.replace("\\", "/")]+arguments,shell=True)
+    return
+
 def download_images_from_manifest(manifest_file,output_dir,executable=False,executable_path_file=None,command_for_gdc_client="gdc-client"):
     """ Download images from manifest file
         calling the gdc transfer tool
@@ -184,3 +197,4 @@ def download_images_from_manifest(manifest_file,output_dir,executable=False,exec
     pipe = subprocess.run([exec_name, "download" , "-m", manifest_file.replace("\\", "/"), "-d", output_dir.replace("\\", "/")],shell=True)
     #text = pipe.communicate()[0]
     #print(text)
+

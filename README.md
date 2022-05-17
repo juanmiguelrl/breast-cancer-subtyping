@@ -8,7 +8,7 @@ After the download, all that has to be done is prepare a json file with the para
 (json file explanation uncompleted at the moment)  
 ## json
 
-### Manifest download options (manifest):  
+### Manifest download options (--m):  
 Compulsory:  
 output_file : the path where the manifest will be stored  
 Optional:  
@@ -18,7 +18,7 @@ files_data_format : the data format which is wanted for the files (svs as defaul
 experimental_strategy : the experimental strategy of the files  
 endpoint : the endpoint where the query request will be sent, it should not be necessary to modify it (as default it has https://api.gdc.cancer.gov/files)  
 
-### GDC data download options (manifest):
+### GDC data download options (--cl):
 Compulsory:  
 output_file : the path where the output will be stored  
 manifest_path : the path where the manifest file is stored  
@@ -32,8 +32,16 @@ endpoint : the endpoint where the query request will be sent, it should not be n
 
 Info about the GDC API at: https://docs.gdc.cancer.gov/API/Users_Guide/Getting_Started/ and notebook with GDC API examples at https://github.com/NCI-GDC/gdc-docs/blob/develop/Notebooks/API_April_2021/Webinar_April_2021.ipynb
 
+### R data download options (--dr):
+(The script script.R in the R folder can be used to download the PAM50 data for the BRCA data, this option can be used also to run other R scripts provided by the user)  
+Compulsory:  
+executable : Boolean indicating if call Rscript or call a personalised path  
+r_script_path : path for the R script to use  
+Optional:  
+r_path : personalised path to call R  
+arguments : arguments to pass to the R script  
 
-### Slides download options (slides) (it requires the gdc-downloader program): 
+### Slides download options (--dl) (it requires the gdc-downloader program): 
 Compulsory:  
 manifest_file : The path to the manifest file  
 output_dir : The path where the slides will be downloaded  
@@ -42,7 +50,7 @@ executable : To indicate if the gdc-client is an executable program in a path to
 executable_path_file : The path where the gdc-client is  
 command_for_gdc_client : The command for the gdc-client in case it can be called directly
 
-### Preprocess options in json (filter):  
+### Preprocess filter options in json (--f):  
 Compulsory:  
 input_dir : directory path with the images to preprocess (written in the format "directory\\*")  
 destination_path : directory path to store the preprocessed images  
@@ -66,6 +74,7 @@ only_one_tissue : bool to indicate if leave only the biggest tissue connected co
 (Options described in order, all of them need to be executed at least once in order to be able to use the next one)  
 --m : download manifest from GDC  
 --cl : download additional data from GDC  
+--dr : run a R script to download data or any other R script wanted by the user
 --dl : download slides from a manifest file using the gdc-client program  
 --d : to downscale the wsi files  
 --s : to store the images together  

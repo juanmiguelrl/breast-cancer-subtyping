@@ -25,6 +25,7 @@ if __name__ == '__main__':
     parser.add_argument("--m", help="download manifest from GDC", required=False, default=False, action="store_true")
     parser.add_argument("--cl", help="download clinical from GDC", required=False, default=False, action="store_true")
     parser.add_argument("--dl", help="download slides from a manifest file using the gdc-client program", required=False, default=False, action="store_true")
+    parser.add_argument("--dr", help="download data using a R script",required=False, default=False, action="store_true")
     parser.add_argument("--d", help="downscale wsi images", required=False, default=False, action="store_true")
     parser.add_argument("--s", help="store images together", required=False, default=False, action="store_true")
     parser.add_argument("--f", help="filters the images applying the options indicated", required=False, default=False, action="store_true")
@@ -62,11 +63,17 @@ if __name__ == '__main__':
         download_manifest.download_data(clinical["output_file"],clinical["manifest_path"],clinical["projects"],clinical["name_restrictions"],
                                                      clinical["fields_dictionary"],clinical["experimental_strategy"],
                                                      clinical["expand"],clinical["files_data_format"],clinical["endpoint"])
+    if args.dr:
+        #default values for the r_donwload
+        r_donwload = {"r_path": "","arguments":[]}
+        r_donwload.update(PARAMS["r_donwload"])
+        download_manifest.download_data_with_R(r_donwload["executable"],r_donwload["r_path"],r_donwload["r_script_path"],r_donwload["arguments"])
     if args.dl:
         #default values for the slides
         slides = {"executable": False, "executable_path_file": None,"command_for_gdc_client" : "gdc-client"}
         slides.update(PARAMS["slides"])
         download_manifest.download_images_from_manifest(slides["manifest_file"],slides["output_dir"],slides["executable"],slides["executable_path_file"],slides["command_for_gdc_client"])
+
     if args.d:
         print("dowsncaling...")
         image_preprocess.downscale_from_manifest(PARAMS["downscale"]["manifest_path"], PARAMS["downscale"]["svsdirectory"], PARAMS["downscale"]["outputDirectory"], PARAMS["downscale"]["scale"],PARAMS["downscale"]["windows"])
