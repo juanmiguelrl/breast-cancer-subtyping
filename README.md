@@ -32,7 +32,7 @@ endpoint : the endpoint where the query request will be sent, it should not be n
 
 Info about the GDC API at: https://docs.gdc.cancer.gov/API/Users_Guide/Getting_Started/ and notebook with GDC API examples at https://github.com/NCI-GDC/gdc-docs/blob/develop/Notebooks/API_April_2021/Webinar_April_2021.ipynb
 
-### R data download options (--dr):
+### R data download options (--dr) (Requires R to be installed):
 (The script script.R in the R folder can be used to download the PAM50 data for the BRCA data, this option can be used also to run other R scripts provided by the user)  
 Compulsory:  
 executable : Boolean indicating if call Rscript or call a personalised path  
