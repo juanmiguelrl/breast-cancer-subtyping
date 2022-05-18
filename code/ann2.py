@@ -1,4 +1,5 @@
-from model import VGG16_model,mobile_net_model,build_model,conv_model2
+from model import build_model
+from clinical_model import load_clinical_data
 import numpy as np
 import tensorflow as tf
 import nni
@@ -16,6 +17,8 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
     print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
     print(device_lib.list_local_devices())
 
+    if parameters["clinical_model"]:
+        load_clinical_data(parameters["clinical_data"])
 
     if parameters['preprocessing_function']:
         if parameters['model_name'] == 'VGG16':
@@ -65,6 +68,8 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
                                                                   shuffle=False)
 
     n_classes = train_generator.num_classes
+
+    print(train_generator.filenames)
     #################################
     # for the use of multigpu
     if parameters["n_gpus"] > 1:
