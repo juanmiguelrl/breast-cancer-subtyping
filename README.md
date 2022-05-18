@@ -8,7 +8,7 @@ After the download, all that has to be done is prepare a json file with the para
 (json file explanation uncompleted at the moment)  
 ## json
 
-### Manifest download options (--m):  
+### Manifest download options in json (--m):  
 Compulsory:  
 output_file : the path where the manifest will be stored  
 Optional:  
@@ -18,7 +18,7 @@ files_data_format : the data format which is wanted for the files (svs as defaul
 experimental_strategy : the experimental strategy of the files  
 endpoint : the endpoint where the query request will be sent, it should not be necessary to modify it (as default it has https://api.gdc.cancer.gov/files)  
 
-### GDC data download options (--cl):
+### GDC data download options in json (--cl):
 Compulsory:  
 output_file : the path where the output will be stored  
 manifest_path : the path where the manifest file is stored  
@@ -32,7 +32,7 @@ endpoint : the endpoint where the query request will be sent, it should not be n
 
 Info about the GDC API at: https://docs.gdc.cancer.gov/API/Users_Guide/Getting_Started/ and notebook with GDC API examples at https://github.com/NCI-GDC/gdc-docs/blob/develop/Notebooks/API_April_2021/Webinar_April_2021.ipynb
 
-### R data download options (--dr) (Requires R to be installed):
+### R data download options in json (--dr) (Requires R to be installed):
 (The script script.R in the R folder can be used to download the PAM50 data for the BRCA data, this option can be used also to run other R scripts provided by the user)  
 Compulsory:  
 executable : Boolean indicating if call Rscript or call a personalised path  
@@ -41,7 +41,7 @@ Optional:
 r_path : personalised path to call R  
 arguments : arguments to pass to the R script  
 
-### join dataframes options (--jd):
+### join dataframes options in json (--jd):
 Compulsory:  
 join_data : List of dictionaries containing each one the two dataframes that want to be joined, these dictionaries contain :  
 &emsp; df1_path : Path of the first dataframe to join  
@@ -53,7 +53,7 @@ join_data : List of dictionaries containing each one the two dataframes that wan
 &emsp; right_on : The column name which will be used to join on in the second dataframe 
 &emsp; output_file : The path for storing the resulting dataframe
 
-### Slides download options (--dl) (it requires the gdc-downloader program): 
+### Slides download options in json (--dl) (it requires the gdc-downloader program): 
 Compulsory:  
 manifest_file : The path to the manifest file  
 output_dir : The path where the slides will be downloaded  
@@ -80,6 +80,13 @@ remove_red_pen : bool to indicate if remove the red pen marks in the slides or n
 remove_green_pen : bool to indicate if remove the green pen marks in the slides or not  
 only_one_tissue : bool to indicate if leave only the biggest tissue connected component or leave all  
 
+### Clasify options in json (--c): 
+(This option stores in a new dataframe the images paths with a "target" column with the classification to be used)  
+Compulsory:  
+input: Path to the dataframe with the data to use in the classification  
+imgdir: Path to the folder containing the images to clasify  
+classification: Column name of the input dataframe which will be used to clasify  
+output_file: Path where the resulting dataframe will be stored
 
 ## Program options:  
 --j : followed by the json file path with the program configuration (needed for the different options of the program to work correctly)  

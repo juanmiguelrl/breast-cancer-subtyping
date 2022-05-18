@@ -16,8 +16,8 @@ import shutil
 
 
 
-#simplify the the pathologic state in 4 stages
-def simplify(x):
+#simplify the the pathologic stage in 4 stages
+def simplify_stage(x):
     #check if x is string
     if isinstance(x, str):
         if "Stage IV" in x:
@@ -33,6 +33,12 @@ def simplify(x):
     else:
         return 0
 
+def simplify(data,classification,target):
+    if classification == "stage":
+        data[target] = data["stage"].apply(simplify_stage)
+    else:
+        data[target] = data[classification]
+
 def rchop(s, suffix):
     if suffix and s.endswith(suffix):
         return s[:-len(suffix)]
@@ -41,6 +47,30 @@ def rchop(s, suffix):
 def cut_svs(x):
     return rchop(x,".svs")
 
+#simplify the the pathologic state in 4 stages
+def indicate_NaN(x):
+    #check if x is string
+    if pd.isnull(x):
+        return "NaN"
+
+def clasify_images(input,imgdir,classification,output_file):
+    data = pd.read_csv(input, sep='\t', header=0)
+    #data[classification] = data[classification].apply(indicate_NaN)
+    # drop rows with stage NaN (which is the stage previously added in indicate_NaN() for the missing values)
+    data = data[data[classification].isnull() != True]
+    #simplify classes
+    target = "target"
+    simplify(data,classification,target)
+    #to only take the files which are in the folder and not in the subfolders (so the discarded images are not taken)
+    onlyfiles = [rchop(f,".png") for f in listdir(imgdir) if isfile(join(imgdir, f))]
+    data["filename"] = data["filename"].apply(cut_svs)
+    data = data[data["filename"].isin(onlyfiles)]
+    data["filepath"] = imgdir + os.path.sep + data["filename"].astype(str) + ".png"
+    data["filepath"] = data["filepath"].replace("/", "\\")
+    data.to_csv(output_file, sep="\t",index=False)
+    return data
+
+#####################################################################
 #if directory does not exist, create it
 def makedirectory(path):
     if not os.path.exists(path):
@@ -145,7 +175,7 @@ def indicate_NaN(x):
 
 
 
-def clasify_images(input,imgdir,sourceDir,newDirTOsplitImages,classification):
+def clasify_images_oldv2(input,imgdir,sourceDir,newDirTOsplitImages,classification):
     data = pd.read_csv(input, sep='\t', header=0)
     data["stage"] = data[classification].apply(indicate_NaN)
     # drop rows with stage NaN (which is the stage previously added in indicate_NaN() for the missing values)
