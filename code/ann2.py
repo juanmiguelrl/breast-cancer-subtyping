@@ -1,3 +1,5 @@
+import pandas as pd
+
 from model import build_model
 from clinical_model import load_clinical_data
 import numpy as np
@@ -10,6 +12,7 @@ from eval import  plot_confusion_matrix,plot_to_image,confusion_matrix_callback,
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from utils import calculate_class_weights
 from tensorflow.python.client import device_lib
+from sklearn.model_selection import train_test_split
 
 def train_ann( parameters,model_dir,log_dir,nni_activated):
 
@@ -17,9 +20,19 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
     print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
     print(device_lib.list_local_devices())
 
-    if parameters["clinical_model"]:
-        load_clinical_data(parameters["clinical_data"])
+############################################
+    #dataframe
+    dataframe = pd.read_csv(parameters['dataframe_path'],sep="\t")
+    train_dataframe, test_dataframe = train_test_split(dataframe, test_size=parameters['validation_split'], stratify=dataframe["target"])
 
+
+
+############################################
+    #clinical
+    if parameters["clinical_model"]:
+        train_clinical,test_clinical = load_clinical_data(parameters["clinical_columns"],train_dataframe,test_dataframe,dataframe)
+
+############################################
     if parameters['preprocessing_function']:
         if parameters['model_name'] == 'VGG16':
             preprocess_func = tf.keras.applications.vgg16.preprocess_input
@@ -36,6 +49,9 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
     else:
         preprocess_func = None
         #target_size = (224,224)
+
+
+
 
     if parameters["data_augmentation"]:
         # Data augmentation
@@ -54,18 +70,49 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
         train_datagen = ImageDataGenerator(preprocessing_function=preprocess_func,
                                            rescale=1. / 255)
 
-    train_generator = train_datagen.flow_from_directory(parameters["trainDir"],
-                                                        batch_size=parameters["batch_size"],
-                                                        class_mode='categorical',
-                                                        target_size=parameters["target_size"])
-
     validation_datagen = ImageDataGenerator(preprocessing_function=preprocess_func,
-                                          rescale=1. / 255)
-    validation_generator = validation_datagen.flow_from_directory(parameters["testDir"],
-                                                                  batch_size=parameters["batch_size"],
-                                                                  class_mode='categorical',
-                                                                  target_size=parameters["target_size"],
-                                                                  shuffle=False)
+                                              rescale=1. / 255)
+    if parameters['dataframe']:
+        dataframe = pd.read_csv(parameters['dataframe_path'],sep="\t")
+        train_dataframe, test_dataframe = train_test_split(dataframe, test_size=parameters['validation_split'], stratify=dataframe["target"])
+
+        train_generator = train_datagen.flow_from_dataframe(
+            train_dataframe,
+            x_col=parameters['x_col'],
+            y_col=parameters['y_col'],
+            target_size=parameters['target_size'],
+            batch_size=parameters['batch_size'],
+            class_mode='categorical',
+            save_to_dir = parameters['save_to_dir_train']#,
+            #shuffle=True
+            )
+
+        validation_generator = validation_datagen.flow_from_dataframe(
+            test_dataframe,
+            x_col=parameters['x_col'],
+            y_col=parameters['y_col'],
+            target_size=parameters['target_size'],
+            batch_size=parameters['batch_size'],
+            class_mode='categorical',
+            shuffle=False,
+            save_to_dir=parameters['save_to_dir_validation']
+            )
+
+
+
+    else:
+        train_generator = train_datagen.flow_from_directory(parameters["trainDir"],
+                                                            batch_size=parameters["batch_size"],
+                                                            class_mode='categorical',
+                                                            target_size=parameters["target_size"],
+                                                            save_to_dir = parameters['save_to_dir_train'])
+
+        validation_generator = validation_datagen.flow_from_directory(parameters["testDir"],
+                                                                      batch_size=parameters["batch_size"],
+                                                                      class_mode='categorical',
+                                                                      target_size=parameters["target_size"],
+                                                                      shuffle=False,
+                                                                      save_to_dir=parameters['save_to_dir_validation'])
 
     n_classes = train_generator.num_classes
 
