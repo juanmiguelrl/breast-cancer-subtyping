@@ -299,9 +299,9 @@ class JoinedGen(tf.keras.utils.Sequence):
         x1 = self.gen1[i]
         x2 = self.gen2[i]
         #y = self.gen3[i]
-        print(self.gen1.index_array)
-        print("\n\n\n")
-        print(self.gen2.indices)
+        # print(self.gen1.index_array)
+        # print("\n\n\n")
+        # print(self.gen2.indices)
         return [x1[0], x2[0]], x1[1]
 
     def on_epoch_end(self):
@@ -309,16 +309,16 @@ class JoinedGen(tf.keras.utils.Sequence):
         self.gen2.on_epoch_end()
         #self.gen3.on_epoch_end()
         #if self.shuffle == True:
-        print(self.gen1.index_array)
-        print("\n\n\n")
-        print(self.gen2.indices)
+        # print(self.gen1.index_array)
+        # print("\n\n\n")
+        # print(self.gen2.indices)
         if self.shuffle:
             np.random.shuffle(self.gen1.index_array)
-            self.gen2.indices = self.gen1.indices
-        print("\n\n\n")
-        print(max(self.gen1.index_array))
-        print("\n\n\n")
-        print(max(self.gen2.indices))
+            self.gen2.indices = self.gen1.index_array
+        # print("\n\n\n")
+        # print(max(self.gen1.index_array))
+        # print("\n\n\n")
+        # print(max(self.gen2.indices))
         #self.gen3.index_array = self.gen1.index_array
 
 #################################

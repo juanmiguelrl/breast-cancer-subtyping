@@ -128,13 +128,13 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
 
         n_classes = len(train_generator.class_indices)
 
-        print(train_generator.filenames)
-        print(train_generator.class_indices)
-        print(train_generator.samples)
-        print(train_generator.n)
-        print(train_generator.__len__())
-        print(len(train_generator))
-        print("\n")
+        # print(train_generator.filenames)
+        # print(train_generator.class_indices)
+        # print(train_generator.samples)
+        # print(train_generator.n)
+        # print(train_generator.__len__())
+        # print(len(train_generator))
+        # print("\n")
     #################################
     # for the use of multigpu
     #prepare the model
@@ -168,8 +168,8 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
     #################################
     #combined generator
     if parameters["image_model"] and parameters["clinical_model"]:
-        train_generator_definitive = JoinedGen(train_generator, train_datagen_clinical)
-        validation_generator_definitive = JoinedGen(validation_generator, test_datagen_clinical)
+        train_generator_definitive = JoinedGen(train_generator, train_generator)
+        validation_generator_definitive = JoinedGen(validation_generator, validation_generator)
     elif parameters["clinical_model"] and not parameters["image_model"]:
         train_generator_definitive = train_datagen_clinical
         validation_generator_definitive = test_datagen_clinical
@@ -228,8 +228,8 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
         steps_per_epoch=steps_per_epoch,
         validation_steps=validation_steps,
         epochs=parameters["epochs"],
-        callbacks=callbacks,
-       # class_weight=class_weight,
+        #callbacks=callbacks,
+        #class_weight=class_weight,
         verbose=verbose
     )
 
