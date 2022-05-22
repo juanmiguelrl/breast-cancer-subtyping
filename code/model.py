@@ -19,18 +19,25 @@ def build_image_model(learning_rate, n_classes,fine_tune,model_name,input_shape)
     else:
         return VGG16_model2(learning_rate, n_classes,fine_tune,input_shape)
 
-def build_model(learning_rate, n_classes,fine_tune,model_name,input_shape,image_model=True,clinical_model=False,clinical_num=0):
+def build_model(learning_rate, n_classes,fine_tune,model_name,input_shape,image_model=True,clinical=False,clinical_num=0):
     if image_model:
         img_model = build_image_model(learning_rate, n_classes,fine_tune,model_name,input_shape)
-    if clinical_model:
+    if clinical:
         clinic_model = clinical_model(clinical_num,n_classes)
     if image_model and clinical_model:
         combinedInput = concatenate([img_model.output, clinic_model.output])
         x = Dense(n_classes, activation="relu")(combinedInput)
         x = Dense(n_classes, activation="linear")(x)
-        model = tf.keras.models.Model(inputs=[img_model.input,clinic_model.input], outputs=clinic_model(img_model.output))
-        return model
+        model = tf.keras.models.Model(inputs=[img_model.input,clinic_model.input], outputs=x)
     elif image_model:
-        return img_model
+        model =  img_model
     elif clinical_model:
-        return clinic_model
+        model = clinic_model
+
+    model.compile(tf.keras.optimizers.Adam(learning_rate=learning_rate),
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'])
+    model.summary()
+    return model
+
+

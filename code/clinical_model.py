@@ -7,12 +7,23 @@ from sklearn.preprocessing import MinMaxScaler
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Dense, Conv2D, MaxPool2D, Flatten, Dropout, LSTM
 import numpy as np
+from tensorflow.keras.models import Sequential
+from tensorflow.keras import Input,Model
+from tensorflow.keras.layers import Dense
 
 def clinical_model(input_num,output_num):
     #defines the model for predicting using the clinical data
-    model = tf.keras.Sequential()
-    model.add(Dense(input_num, input_dim=input_num, activation="relu"))
-    model.add(Dense(output_num, activation="softmax"))
+    # model = Sequential()
+    # tf.keras.layers.Input(shape=(input_num,))
+    # model.add(Dense(input_num, input_dim=input_num, activation="relu"))
+    # model.add(Dense(output_num, activation="softmax"))
+
+    print(input_num)
+    input = Input(shape=(input_num,))
+    model = Dense(input_num, activation="relu")(input)
+    model = Dense(output_num, activation="softmax") (model)
+    model = Model(inputs=input, outputs=model)
+
     return model
 
 
@@ -69,33 +80,33 @@ def load_clinical_data(parameters,data,df):
             #y[i] = self.labels[ID]
 
         return X#, keras.utils.to_categorical(y, num_classes=self.n_classes)
-
-dataframe = pd.read_csv("D:\\Escritorio\\tfg\\definitive_test\\classified.csv",sep="\t")
-from sklearn.model_selection import train_test_split
-train_dataframe, test_dataframe = train_test_split(dataframe, test_size=0.25, stratify=dataframe["target"])
-parameters = {"continuos" : ["age_at_initial_pathologic_diagnosis"], "categorical" : ["BRCA_Pathology"]}
-train_Data = load_clinical_data(parameters,train_dataframe,dataframe)
-test_data = load_clinical_data(parameters,test_dataframe,dataframe)
-
-# parameters2 = {"continuos" : ["age_at_initial_pathologic_diagnosis"], "categorical" : ["BRCA_Subtype_PAM50"]}
-# train_Data2,test_data2 = load_clinical_data_old(parameters2,train_dataframe,test_dataframe,dataframe)
-
-
-
-#one hot encoding for the value to predict
-zipBinarizer = LabelBinarizer().fit(dataframe["target"])
-train_y = zipBinarizer.transform(train_dataframe["target"])
-test_y = zipBinarizer.transform(test_dataframe["target"])
-
-
-model = clinical_model(train_Data.shape[1],train_y.shape[1])
-#model = clinical_model_v2(train_Data.shape[1],train_y.shape[1])
-model.compile(optimizer='adam', loss="categorical_crossentropy", metrics=['accuracy'])
-
-model.fit(
-	x=train_Data, y=train_y,
-	validation_data=(test_data, test_y),
-	epochs=100, batch_size=8)
+#
+# dataframe = pd.read_csv("D:\\Escritorio\\tfg\\definitive_test\\classified.csv",sep="\t")
+# from sklearn.model_selection import train_test_split
+# train_dataframe, test_dataframe = train_test_split(dataframe, test_size=0.25, stratify=dataframe["target"])
+# parameters = {"continuos" : ["age_at_initial_pathologic_diagnosis"], "categorical" : ["BRCA_Pathology"]}
+# train_Data = load_clinical_data(parameters,train_dataframe,dataframe)
+# test_data = load_clinical_data(parameters,test_dataframe,dataframe)
+#
+# # parameters2 = {"continuos" : ["age_at_initial_pathologic_diagnosis"], "categorical" : ["BRCA_Subtype_PAM50"]}
+# # train_Data2,test_data2 = load_clinical_data_old(parameters2,train_dataframe,test_dataframe,dataframe)
+#
+#
+#
+# #one hot encoding for the value to predict
+# zipBinarizer = LabelBinarizer().fit(dataframe["target"])
+# train_y = zipBinarizer.transform(train_dataframe["target"])
+# test_y = zipBinarizer.transform(test_dataframe["target"])
+#
+#
+# model = clinical_model(train_Data.shape[1],train_y.shape[1])
+# #model = clinical_model_v2(train_Data.shape[1],train_y.shape[1])
+# model.compile(optimizer='adam', loss="categorical_crossentropy", metrics=['accuracy'])
+#
+# model.fit(
+# 	x=train_Data, y=train_y,
+# 	validation_data=(test_data, test_y),
+# 	epochs=100, batch_size=8)
 
 
 # model = clinical_model(train_Data2.shape[1],5)
@@ -119,7 +130,7 @@ model.fit(
 from tensorflow.keras.utils import Sequence
 import math
 
-class DataGenerator(Sequence):
+class ClinicalDataGenerator(Sequence):
     def __init__(self, dataframe, dfy, batch_size=32, shuffle=False,mode='train'):
         self.batch_size = batch_size
         self.df = dataframe
@@ -186,6 +197,7 @@ class DataGenerator(Sequence):
 # target = pd.get_dummies(target, columns=["target"])
 #############
 
+#process the data for the model which uses the clinical data
 def process_clinical_data(dataframe,parameters):
     cs = MinMaxScaler()
     data = dataframe.copy()
@@ -202,64 +214,64 @@ def process_clinical_data(dataframe,parameters):
 
     return data,target
 
-
-dataframe = pd.read_csv("D:\\Escritorio\\tfg\\definitive_test\\classified.csv",sep="\t")
-from sklearn.model_selection import train_test_split
-train_dataframe, test_dataframe = train_test_split(dataframe, test_size=0.25, stratify=dataframe["target"])
-#train_dataframe.set_index("filepath", inplace=True)
-parameters = {"continuos" : ["age_at_initial_pathologic_diagnosis","size"], "categorical" : ["BRCA_Pathology"]}
-data,target = process_clinical_data(dataframe,parameters)
-
-#datagen = DataGenerator(train_dataframe)
-#datagen = DataGenerator(train_dataframe["BRCA_Pathology"], "BRCA_Pathology",dataframe, batch_size=32)
-datagen = DataGenerator(data,target)
-
-model = clinical_model(data.shape[1],target.shape[1])
-#model = clinical_model_v2(train_Data.shape[1],train_y.shape[1])
-model.compile(optimizer='adam', loss="categorical_crossentropy", metrics=['accuracy'])
-# model.fit(datagen, epochs=100,
-#           steps_per_epoch=8,
-#           batch_size=8,
-#           verbose=1)
 #
-# model.predict(datagen[1][0])
+# dataframe = pd.read_csv("D:\\Escritorio\\tfg\\definitive_test\\classified.csv",sep="\t")
+# from sklearn.model_selection import train_test_split
+# train_dataframe, test_dataframe = train_test_split(dataframe, test_size=0.25, stratify=dataframe["target"])
+# #train_dataframe.set_index("filepath", inplace=True)
+# parameters = {"continuos" : ["age_at_initial_pathologic_diagnosis","size"], "categorical" : ["BRCA_Pathology"]}
+# data,target = process_clinical_data(dataframe,parameters)
+#
+# #datagen = DataGenerator(train_dataframe)
+# #datagen = DataGenerator(train_dataframe["BRCA_Pathology"], "BRCA_Pathology",dataframe, batch_size=32)
+# datagen = DataGenerator(data,target)
+#
+# model = clinical_model(data.shape[1],target.shape[1])
+# #model = clinical_model_v2(train_Data.shape[1],train_y.shape[1])
+# model.compile(optimizer='adam', loss="categorical_crossentropy", metrics=['accuracy'])
+# # model.fit(datagen, epochs=100,
+# #           steps_per_epoch=8,
+# #           batch_size=8,
+# #           verbose=1)
+# #
+# # model.predict(datagen[1][0])
 
 #################################
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-preprocess_func = tf.keras.applications.vgg16.preprocess_input
-
-parameters = {"x_col" : "filepath", "y_col" : "target",'target_size': (224,224),'preprocess_func' : preprocess_func,"batch_size" : 32,
-              "save_to_dir_train" : "D:\\Escritorio\\tfg\definitive_test\\generator_images\\train",
-              "save_to_dir_validation" : "D:\\Escritorio\\tfg\definitive_test\\generator_images\\validation"}
-
-train_datagen = ImageDataGenerator(preprocessing_function=preprocess_func,
-                                   rescale=1. / 255)
-
-validation_datagen = ImageDataGenerator(preprocessing_function=preprocess_func,
-                                        rescale=1. / 255)
-
-train_generator = train_datagen.flow_from_dataframe(
-    dataframe,
-    x_col=parameters['x_col'],
-    y_col=parameters['y_col'],
-    target_size=parameters['target_size'],
-    batch_size=parameters['batch_size'],
-    class_mode='categorical',
-    shuffle=False,
-    #save_to_dir=parameters['save_to_dir_train']  # ,
-    # shuffle=True
-)
-
-validation_generator = validation_datagen.flow_from_dataframe(
-    test_dataframe,
-    x_col=parameters['x_col'],
-    y_col=parameters['y_col'],
-    target_size=parameters['target_size'],
-    batch_size=parameters['batch_size'],
-    class_mode='categorical',
-    shuffle=False,
-    #save_to_dir=parameters['save_to_dir_validation']
-)
+# from tensorflow.keras.preprocessing.image import ImageDataGenerator
+# preprocess_func = tf.keras.applications.vgg16.preprocess_input
+#
+# parameters = {"x_col" : "filepath", "y_col" : "target",'target_size': (224,224),'preprocess_func' : preprocess_func,"batch_size" : 32,
+#               "save_to_dir_train" : "D:\\Escritorio\\tfg\\definitive_test\\generator_images\\train",
+#               "save_to_dir_validation" : "D:\\Escritorio\\tfg\\definitive_test\\generator_images\\validation"}
+#
+# train_datagen = ImageDataGenerator(preprocessing_function=preprocess_func,
+#                                    rescale=1. / 255)
+#
+# validation_datagen = ImageDataGenerator(preprocessing_function=preprocess_func,
+#                                         rescale=1. / 255)
+#
+# train_generator = train_datagen.flow_from_dataframe(
+#     dataframe,
+#     x_col=parameters['x_col'],
+#     y_col=parameters['y_col'],
+#     target_size=parameters['target_size'],
+#     batch_size=parameters['batch_size'],
+#     class_mode='categorical',
+#     shuffle=False,
+#     #save_to_dir=parameters['save_to_dir_train']  # ,
+#     # shuffle=True
+# )
+#
+# validation_generator = validation_datagen.flow_from_dataframe(
+#     test_dataframe,
+#     x_col=parameters['x_col'],
+#     y_col=parameters['y_col'],
+#     target_size=parameters['target_size'],
+#     batch_size=parameters['batch_size'],
+#     class_mode='categorical',
+#     shuffle=False,
+#     #save_to_dir=parameters['save_to_dir_validation']
+# )
 
 #################################
 class JoinedGen(tf.keras.utils.Sequence):
@@ -276,9 +288,9 @@ class JoinedGen(tf.keras.utils.Sequence):
         assert len(input_gen1) == len(input_gen2)
         # == len(target_gen)
         #self.gen2.indices = self.gen1.index_array
-        if self.shuffle:
-            np.random.shuffle(self.gen1.index_array)
-            self.gen2.indices = self.gen1.index_array
+        # if self.shuffle:
+        #     np.random.shuffle(self.gen1.index_array)
+        #     self.gen2.indices = self.gen1.index_array
 
     def __len__(self):
         return len(self.gen1)
@@ -290,7 +302,7 @@ class JoinedGen(tf.keras.utils.Sequence):
         print(self.gen1.index_array)
         print("\n\n\n")
         print(self.gen2.indices)
-        return [x1, x2]#, y
+        return [x1[0], x2[0]], x1[1]
 
     def on_epoch_end(self):
         self.gen1.on_epoch_end()
@@ -302,7 +314,7 @@ class JoinedGen(tf.keras.utils.Sequence):
         print(self.gen2.indices)
         if self.shuffle:
             np.random.shuffle(self.gen1.index_array)
-            self.gen2.indices = self.gen1.index_array
+            self.gen2.indices = self.gen1.indices
         print("\n\n\n")
         print(max(self.gen1.index_array))
         print("\n\n\n")
@@ -310,8 +322,8 @@ class JoinedGen(tf.keras.utils.Sequence):
         #self.gen3.index_array = self.gen1.index_array
 
 #################################
-join = JoinedGen(train_generator, datagen)
-
-ff = join[1]
-
-join.on_epoch_end()
+# join = JoinedGen(train_generator, datagen)
+#
+# ff = join[1]
+#
+# join.on_epoch_end()

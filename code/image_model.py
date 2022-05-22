@@ -5,6 +5,8 @@ from tensorflow.keras.applications import Xception
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Conv2D, MaxPool2D, Flatten, Dropout
 from tensorflow.keras.optimizers import Adam, Adagrad
+from tensorflow.keras import Input
+from tensorflow.keras import Input,Model
 
 def VGG16_model(learning_rate, n_classes,fine_tune,input_shape):
     conv_base = VGG16(input_shape=(224, 224, 3),
@@ -34,9 +36,9 @@ def VGG16_model(learning_rate, n_classes,fine_tune,input_shape):
     model = tf.keras.models.Model(inputs=conv_base.input, outputs=output_layer)
 
     # Compiles the model for training.
-    model.compile(tf.keras.optimizers.Adam(learning_rate=learning_rate),
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(tf.keras.optimizers.Adam(learning_rate=learning_rate),
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
 
     return model
 
@@ -61,8 +63,8 @@ def VGG16_model2(learning_rate, n_classes,fine_tune,input_shape):
     #         layer.trainable = False
 
     model.add(Dense(units=n_classes, activation='softmax'))
-    model.compile(optimizer=Adam(learning_rate=learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
-    model.summary()
+    # model.compile(optimizer=Adam(learning_rate=learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
+    # model.summary()
     return model
 
 def conv_model2(learning_rate, n_classes,fine_tune=0):
@@ -82,8 +84,8 @@ def conv_model2(learning_rate, n_classes,fine_tune=0):
             Flatten(),
             Dense(units=n_classes, activation='softmax')
     ])
-    model.compile(optimizer=Adam(learning_rate=learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
-    model.summary()
+    # model.compile(optimizer=Adam(learning_rate=learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
+    # model.summary()
     return model
 
 def mobile_net_model(learning_rate, n_classes,fine_tune=0):
@@ -98,9 +100,9 @@ def mobile_net_model(learning_rate, n_classes,fine_tune=0):
     trf_learn.add(Dense(units=32, activation="relu"))
     trf_learn.add(Dense(units=1, activation="sigmoid"))
 
-    trf_learn.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
-
-    trf_learn.summary()
+    # trf_learn.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+    #
+    # trf_learn.summary()
 
     return trf_learn
 
@@ -120,8 +122,8 @@ def conv_model(learning_rate, n_classes,fine_tune=0):
 
     model.add(Dense(units=1, activation="softmax"))
 
-    model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
-    model.summary()
+    # model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+    # model.summary()
     return model
 
 
@@ -193,7 +195,7 @@ def patches(learning_rate, n_classes,fine_tune=0):
 def xception(learning_rate, n_classes,fine_tune=0):
     xception_model = Xception()
 
-    model = Sequential()
+    # model = Sequential()
     # for layer in xception_model.layers[:-1]:
     #     model.add(layer)
     # for layer in model.layers:
@@ -206,8 +208,15 @@ def xception(learning_rate, n_classes,fine_tune=0):
     #     for layer in model.layers:
     #         layer.trainable = False
 
-    model.add(xception_model)
-    model.add(Dense(units=n_classes, activation='softmax'))
-    model.compile(optimizer=Adam(learning_rate=learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
-    model.summary()
+    # model.add(xception_model)
+    # model.add(Dense(units=n_classes, activation='softmax'))
+
+    # model.compile(optimizer=Adam(learning_rate=learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
+    # model.summary()
+
+
+    input = Input(shape=(299, 299, 3))
+    model = xception_model(input)
+    model = Dense(units=n_classes, activation='softmax') (model)
+    model = Model(inputs=input, outputs=model)
     return model
