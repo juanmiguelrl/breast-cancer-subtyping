@@ -168,8 +168,8 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
     #################################
     #combined generator
     if parameters["image_model"] and parameters["clinical_model"]:
-        train_generator_definitive = JoinedGen(train_generator, train_generator)
-        validation_generator_definitive = JoinedGen(validation_generator, validation_generator)
+        train_generator_definitive = JoinedGen(train_generator, train_datagen_clinical)
+        validation_generator_definitive = JoinedGen(validation_generator, test_datagen_clinical)
     elif parameters["clinical_model"] and not parameters["image_model"]:
         train_generator_definitive = train_datagen_clinical
         validation_generator_definitive = test_datagen_clinical

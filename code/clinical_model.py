@@ -162,8 +162,14 @@ class ClinicalDataGenerator(Sequence):
             np.random.shuffle(self.index)
 
     def __get_data(self, batch):
-        X =  self.df.loc[batch].values
-        y = self.dfy.loc[batch].values
+        print("******************")
+        print(batch)
+        print("******************")
+        # X =  self.df.loc[batch].values
+        # y = self.dfy.loc[batch].values
+        X = self.df.reindex([batch]).values
+        y = self.dfy.reindex([batch]).values
+
         #X = self.df.loc[1].values
         #X = self.df[1]
             #y =  # logic
@@ -306,7 +312,7 @@ class JoinedGen(tf.keras.utils.Sequence):
 
     def on_epoch_end(self):
         self.gen1.on_epoch_end()
-        self.gen2.on_epoch_end()
+        #self.gen2.on_epoch_end()
         #self.gen3.on_epoch_end()
         #if self.shuffle == True:
         # print(self.gen1.index_array)
