@@ -25,7 +25,8 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
     #dataframe
     dataframe = pd.read_csv(parameters['dataframe_path'],sep="\t")
     train_dataframe, test_dataframe = train_test_split(dataframe, test_size=parameters['validation_split'], stratify=dataframe["target"])
-
+    train_dataframe = train_dataframe.reset_index(drop=True)
+    test_dataframe = test_dataframe.reset_index(drop=True)
 
 
 ############################################
@@ -93,8 +94,8 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
         validation_datagen = ImageDataGenerator(preprocessing_function=preprocess_func,
                                                   rescale=1. / 255)
         if parameters['dataframe']:
-            dataframe = pd.read_csv(parameters['dataframe_path'],sep="\t")
-            train_dataframe, test_dataframe = train_test_split(dataframe, test_size=parameters['validation_split'], stratify=dataframe["target"])
+            # dataframe = pd.read_csv(parameters['dataframe_path'],sep="\t")
+            # train_dataframe, test_dataframe = train_test_split(dataframe, test_size=parameters['validation_split'], stratify=dataframe["target"])
 
             train_generator = train_datagen.flow_from_dataframe(
                 train_dataframe,

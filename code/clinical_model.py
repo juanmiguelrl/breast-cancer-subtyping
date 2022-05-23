@@ -133,19 +133,19 @@ import math
 class ClinicalDataGenerator(Sequence):
     def __init__(self, dataframe, dfy, batch_size=32, shuffle=False,mode='train'):
         self.batch_size = batch_size
-        self.df = dataframe
-        self.indices = self.df.index.tolist()
+        self.data = dataframe
+        self.indices = self.data.index.tolist()
         #self.num_classes = num_classes
         self.shuffle = shuffle
         #self.x_col = x_col
         #self.y_col = y_col
-        self.dfy = dfy
+        self.datay = dfy
         self.on_epoch_end()
         self.mode = mode
 
     def __len__(self):
-        #return len(self.indices) // self.batch_size
         return math.ceil(len(self.indices) / self.batch_size)
+
     def __getitem__(self, index):
         # Generate one batch of data
         # Generate indices of the batch
@@ -167,8 +167,10 @@ class ClinicalDataGenerator(Sequence):
         print("******************")
         # X =  self.df.loc[batch].values
         # y = self.dfy.loc[batch].values
-        X = self.df.reindex(batch).values
-        y = self.dfy.reindex(batch).values
+        X = self.data.reindex(batch).values
+        y = self.datay.reindex(batch).values
+
+        print(self.data.index.values.tolist())
 
         #X = self.df.loc[1].values
         #X = self.df[1]
@@ -327,9 +329,9 @@ class JoinedGen(tf.keras.utils.Sequence):
         # print(self.gen1.index_array)
         # print("\n\n\n")
         # print(self.gen2.indices)
-        if self.shuffle:
-            np.random.shuffle(self.gen1.index_array)
-            self.gen2.indices = self.gen1.index_array
+        # if self.shuffle:
+        #     np.random.shuffle(self.gen1.index_array)
+        self.gen2.indices = self.gen1.index_array
         # print("\n\n\n")
         # print(max(self.gen1.index_array))
         # print("\n\n\n")
