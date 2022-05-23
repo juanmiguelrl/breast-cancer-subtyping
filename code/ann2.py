@@ -24,6 +24,14 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
 ############################################
     #dataframe
     dataframe = pd.read_csv(parameters['dataframe_path'],sep="\t")
+    if parameters["balance_data"]:
+        print("before balance\n")
+        print(dataframe["target"].value_counts())
+        g = dataframe.groupby('target')
+        dataframe = g.apply(lambda x: x.sample(g.size().min()).reset_index(drop=True)).reset_index(drop=True)
+        print("after balance\n")
+        print(dataframe["target"].value_counts())
+
     train_dataframe, test_dataframe = train_test_split(dataframe, test_size=parameters['validation_split'], stratify=dataframe["target"])
     train_dataframe = train_dataframe.reset_index(drop=True)
     test_dataframe = test_dataframe.reset_index(drop=True)

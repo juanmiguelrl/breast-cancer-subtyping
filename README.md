@@ -86,7 +86,11 @@ Compulsory:
 input: Path to the dataframe with the data to use in the classification  
 imgdir: Path to the folder containing the images to clasify  
 classification: Column name of the input dataframe which will be used to clasify  
-output_file: Path where the resulting dataframe will be stored
+output_file: Path where the resulting dataframe will be stored  
+
+### Train options in json (--t):  
+Compulsory:  
+balance_data : boolean, if true it balance the data taking randomly the same amount of samples of each classify option
 
 ## Program options:  
 --j : followed by the json file path with the program configuration (needed for the different options of the program to work correctly)  
