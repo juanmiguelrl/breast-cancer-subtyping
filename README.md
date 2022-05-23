@@ -18,7 +18,7 @@ files_data_format : the data format which is wanted for the files (svs as defaul
 experimental_strategy : the experimental strategy of the files  
 endpoint : the endpoint where the query request will be sent, it should not be necessary to modify it (as default it has https://api.gdc.cancer.gov/files)  
 
-### GDC data download options in json (--cl):
+### GDC data download options in json (--cl):  
 Compulsory:  
 output_file : the path where the output will be stored  
 manifest_path : the path where the manifest file is stored  
@@ -28,6 +28,8 @@ name_restrictions : List with restrictions for the name of the slides searched (
 files_data_format : the data format which is wanted for the files (svs as default)   
 experimental_strategy : the experimental strategy of the files  
 expand : expand indicated to the API (as default has ["diagnoses","samples","files"])   
+fields_dictionary : dictionary with the fields to download and the how are wanted to be named in the final output file  
+(Avaliable fields: https://docs.gdc.cancer.gov/API/Users_Guide/Appendix_A_Available_Fields/)  
 endpoint : the endpoint where the query request will be sent, it should not be necessary to modify it (as default it has https://api.gdc.cancer.gov/cases)  
 
 Info about the GDC API at: https://docs.gdc.cancer.gov/API/Users_Guide/Getting_Started/ and notebook with GDC API examples at https://github.com/NCI-GDC/gdc-docs/blob/develop/Notebooks/API_April_2021/Webinar_April_2021.ipynb
