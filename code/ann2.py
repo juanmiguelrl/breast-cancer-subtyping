@@ -5,6 +5,7 @@ from clinical_model import process_clinical_data,ClinicalDataGenerator,JoinedGen
 import numpy as np
 import tensorflow as tf
 import nni
+import math
 from tensorflow import keras
 
 import sklearn.metrics
@@ -37,9 +38,16 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
         #train_clinical,test_clinical = load_clinical_data(parameters["clinical_columns"],train_dataframe,test_dataframe,dataframe)
         n_classes = clinical_train_target.shape[1]
         clinical_input_num = clinical_train_dataframe.shape[1]
+
+        # print("\n\n\n")
+        #
+        # print(clinical_train_dataframe)
+        #
+        # print("\n\n\n")
     else:
         n_classes = 0
         clinical_input_num = 0
+
 
 
 ############################################
@@ -138,6 +146,8 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
     #################################
     # for the use of multigpu
     #prepare the model
+    #parameters["image_model"] = False
+    #parameters["clinical_model"] = False
     if parameters["n_gpus"] > 1:
         device_type = 'GPU'
         devices = tf.config.experimental.list_physical_devices(
@@ -156,8 +166,8 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
                             parameters["image_model"], parameters["clinical_model"], clinical_input_num)
         #model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"],parameters["target_size"])
 
-    steps_per_epoch = train_generator.n // parameters["batch_size"]
-    validation_steps = validation_generator.n // parameters["batch_size"]
+    steps_per_epoch = math.ceil(train_generator.n / parameters["batch_size"])
+    validation_steps = math.ceil(validation_generator.n / parameters["batch_size"])
 
 
     if parameters["class_weights"]:
@@ -228,10 +238,12 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
         steps_per_epoch=steps_per_epoch,
         validation_steps=validation_steps,
         epochs=parameters["epochs"],
-        #callbacks=callbacks,
+        callbacks=callbacks,
         #class_weight=class_weight,
         verbose=verbose
     )
+
+    print(model.predict(train_generator_definitive[1][0]))
 
     #test_acc = test(args, model, device, test_loader)
     _,test_acc = model.evaluate(validation_generator_definitive)

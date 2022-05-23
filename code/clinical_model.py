@@ -167,8 +167,8 @@ class ClinicalDataGenerator(Sequence):
         print("******************")
         # X =  self.df.loc[batch].values
         # y = self.dfy.loc[batch].values
-        X = self.df.reindex([batch]).values
-        y = self.dfy.reindex([batch]).values
+        X = self.df.reindex(batch).values
+        y = self.dfy.reindex(batch).values
 
         #X = self.df.loc[1].values
         #X = self.df[1]
@@ -179,8 +179,6 @@ class ClinicalDataGenerator(Sequence):
             #     y[i] =  # labels
 
         return X, y
-
-
 
 
 ######################
@@ -227,11 +225,11 @@ def process_clinical_data(dataframe,parameters):
 # #train_dataframe.set_index("filepath", inplace=True)
 # parameters = {"continuos" : ["age_at_initial_pathologic_diagnosis","size"], "categorical" : ["BRCA_Pathology"]}
 # data,target = process_clinical_data(dataframe,parameters)
-#
-# #datagen = DataGenerator(train_dataframe)
-# #datagen = DataGenerator(train_dataframe["BRCA_Pathology"], "BRCA_Pathology",dataframe, batch_size=32)
-# datagen = DataGenerator(data,target)
-#
+# #
+# # datagen = ClinicalDataGenerator(train_dataframe)
+# # datagen = ClinicalDataGenerator(train_dataframe["BRCA_Pathology"], "BRCA_Pathology",dataframe, batch_size=32)
+# datagen = ClinicalDataGenerator(data,target)
+# #
 # model = clinical_model(data.shape[1],target.shape[1])
 # #model = clinical_model_v2(train_Data.shape[1],train_y.shape[1])
 # model.compile(optimizer='adam', loss="categorical_crossentropy", metrics=['accuracy'])
@@ -308,6 +306,15 @@ class JoinedGen(tf.keras.utils.Sequence):
         # print(self.gen1.index_array)
         # print("\n\n\n")
         # print(self.gen2.indices)
+
+        #print each row of x1,x2
+        # for i in range(0, len(x1[0])):
+        #     print("\n")
+        #     print(x1[0][i])
+        #     print(x2[0][i])
+        #     print(x1[1][i])
+        #     print("\n")
+
         return [x1[0], x2[0]], x1[1]
 
     def on_epoch_end(self):
@@ -333,3 +340,10 @@ class JoinedGen(tf.keras.utils.Sequence):
 # ff = join[1]
 #
 # join.on_epoch_end()
+#model = build_model(0.01,5,1,"xception",(224,224,3),True,True,data.shape[1])
+# model.predict(join[1][0])
+
+    # model.fit(
+    #     join,
+    #     epochs=1,
+    # )

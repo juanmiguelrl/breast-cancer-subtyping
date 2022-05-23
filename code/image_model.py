@@ -47,11 +47,11 @@ def VGG16_model2(learning_rate, n_classes,fine_tune,input_shape):
     vgg16_model = tf.keras.applications.vgg16.VGG16()
 
 
-    model = Sequential()
-    for layer in vgg16_model.layers[:-1]:
-        model.add(layer)
-    for layer in model.layers:
-        layer.trainable = False
+    # model = Sequential()
+    # for layer in vgg16_model.layers[:-1]:
+    #     model.add(layer)
+    # for layer in model.layers:
+    #     layer.trainable = False
 
 
 
@@ -62,9 +62,15 @@ def VGG16_model2(learning_rate, n_classes,fine_tune,input_shape):
     #     for layer in model.layers:
     #         layer.trainable = False
 
-    model.add(Dense(units=n_classes, activation='softmax'))
+    # model.add(Dense(units=n_classes, activation='softmax'))
     # model.compile(optimizer=Adam(learning_rate=learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
     # model.summary()
+
+    input = Input(shape=(224, 224, 3))
+    model = vgg16_model(input)
+    model = Dense(units=n_classes, activation='softmax') (model)
+    model = Model(inputs=input, outputs=model)
+
     return model
 
 def conv_model2(learning_rate, n_classes,fine_tune=0):
