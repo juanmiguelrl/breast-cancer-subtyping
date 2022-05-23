@@ -33,11 +33,14 @@ def simplify_stage(x):
     else:
         return 0
 
-def simplify(data,classification,target):
+def simplify(data,classification,target,simplify):
     if classification == "stage":
         data[target] = data["stage"].apply(simplify_stage)
     else:
         data[target] = data[classification]
+    if simplify:
+        data["stage_simplified"] = data["stage"].apply(simplify_stage)
+
 
 def rchop(s, suffix):
     if suffix and s.endswith(suffix):
@@ -53,14 +56,14 @@ def indicate_NaN(x):
     if pd.isnull(x):
         return "NaN"
 
-def clasify_images(input,imgdir,classification,output_file):
+def clasify_images(input,imgdir,classification,output_file,simplify_stage):
     data = pd.read_csv(input, sep='\t', header=0)
     #data[classification] = data[classification].apply(indicate_NaN)
     # drop rows with stage NaN (which is the stage previously added in indicate_NaN() for the missing values)
     data = data[data[classification].isnull() != True]
     #simplify classes
     target = "target"
-    simplify(data,classification,target)
+    simplify(data,classification,target,simplify_stage)
     #to only take the files which are in the folder and not in the subfolders (so the discarded images are not taken)
     onlyfiles = [rchop(f,".png") for f in listdir(imgdir) if isfile(join(imgdir, f))]
     data["filename"] = data["filename"].apply(cut_svs)

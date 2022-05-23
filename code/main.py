@@ -99,9 +99,9 @@ if __name__ == '__main__':
                               filter["only_one_tissue"],filter["empty_threshold"],filter["canny_params"])
     if args.c:
         print("clasifying images...")
-        clasify_img = {}
+        clasify_img = {"simplify_stage": False}
         clasify_img.update(PARAMS["clasify"])
-        clasify.clasify_images(clasify_img["input"], clasify_img["imgdir"], clasify_img["classification"], clasify_img["output_file"])
+        clasify.clasify_images(clasify_img["input"], clasify_img["imgdir"], clasify_img["classification"], clasify_img["output_file"],clasify_img["simplify_stage"])
         #clasify.clasify_images_oldv2(PARAMS["clasify"]["input"], PARAMS["clasify"]["imgdir"], PARAMS["clasify"]["sourceDir"], PARAMS["clasify"]["newDirTOsplitImages"],PARAMS["classification"])
 
     if args.t or args.e:

@@ -89,6 +89,8 @@ input: Path to the dataframe with the data to use in the classification
 imgdir: Path to the folder containing the images to clasify  
 classification: Column name of the input dataframe which will be used to clasify  
 output_file: Path where the resulting dataframe will be stored  
+Optional:  
+simplify_stage: Boolean if true it will create a new column in the output dataset with the column stage simplified (to 1,2,3,4)  
 
 ### Train options in json (--t): (not finished yet) 
 Compulsory:  
