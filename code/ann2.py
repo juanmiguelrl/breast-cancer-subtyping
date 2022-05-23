@@ -53,6 +53,8 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
         # print(clinical_train_dataframe)
         #
         # print("\n\n\n")
+        steps_per_epoch = len(train_datagen_clinical)
+        validation_steps = len(test_datagen_clinical)
     else:
         n_classes = 0
         clinical_input_num = 0
@@ -143,6 +145,8 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
                                                                           shuffle=False,
                                                                           save_to_dir=parameters['save_to_dir_validation'])
 
+        steps_per_epoch = math.ceil(train_generator.n / parameters["batch_size"])
+        validation_steps = math.ceil(validation_generator.n / parameters["batch_size"])
         n_classes = len(train_generator.class_indices)
 
         # print(train_generator.filenames)
@@ -175,14 +179,10 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
                             parameters["image_model"], parameters["clinical_model"], clinical_input_num)
         #model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"],parameters["target_size"])
 
-    steps_per_epoch = math.ceil(train_generator.n / parameters["batch_size"])
-    validation_steps = math.ceil(validation_generator.n / parameters["batch_size"])
 
 
-    if parameters["class_weights"]:
-        class_weight = calculate_class_weights(train_generator)
-    else:
-        class_weight = None
+
+
 
     #################################
     #combined generator
@@ -195,6 +195,11 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
     else:
         train_generator_definitive = train_generator
         validation_generator_definitive = validation_generator
+    #################################
+    if parameters["class_weights"]:
+            class_weight = calculate_class_weights(train_generator_definitive)
+    else:
+        class_weight = None
     #################################
     #prepare callbacks
     if parameters["log"]:
@@ -248,7 +253,7 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
         validation_steps=validation_steps,
         epochs=parameters["epochs"],
         callbacks=callbacks,
-        #class_weight=class_weight,
+        class_weight=class_weight,
         verbose=verbose
         #,drop_remainder=True
     )
