@@ -88,7 +88,7 @@ imgdir: Path to the folder containing the images to clasify
 classification: Column name of the input dataframe which will be used to clasify  
 output_file: Path where the resulting dataframe will be stored  
 
-### Train options in json (--t):  
+### Train options in json (--t): (not finished yet) 
 Compulsory:  
 balance_data : boolean, if true it balance the data taking randomly the same amount of samples of each clasify option
 
