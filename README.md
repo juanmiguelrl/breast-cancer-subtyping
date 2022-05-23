@@ -90,7 +90,7 @@ output_file: Path where the resulting dataframe will be stored
 
 ### Train options in json (--t):  
 Compulsory:  
-balance_data : boolean, if true it balance the data taking randomly the same amount of samples of each classify option
+balance_data : boolean, if true it balance the data taking randomly the same amount of samples of each clasify option
 
 ## Program options:  
 --j : followed by the json file path with the program configuration (needed for the different options of the program to work correctly)  
