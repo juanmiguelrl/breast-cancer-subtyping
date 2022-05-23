@@ -241,8 +241,10 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
         callbacks=callbacks,
         #class_weight=class_weight,
         verbose=verbose
+        #,drop_remainder=True
     )
 
+    print(train_generator_definitive[1][0])
     print(model.predict(train_generator_definitive[1][0]))
 
     #test_acc = test(args, model, device, test_loader)

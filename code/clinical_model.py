@@ -284,6 +284,8 @@ class JoinedGen(tf.keras.utils.Sequence):
         self.gen1 = input_gen1
         self.gen2 = input_gen2
         self.shuffle = shuffle
+        self.classes = self.gen1.classes
+        self.class_indices = self.gen1.class_indices
         #self.gen3 = target_gen
 
         print(self.gen1.__len__())
@@ -308,12 +310,12 @@ class JoinedGen(tf.keras.utils.Sequence):
         # print(self.gen2.indices)
 
         #print each row of x1,x2
-        # for i in range(0, len(x1[0])):
-        #     print("\n")
-        #     print(x1[0][i])
-        #     print(x2[0][i])
-        #     print(x1[1][i])
-        #     print("\n")
+        print("\n")
+        for i in range(0, len(x1[0])):
+            #print(x1[0][i])
+            print(x2[0][i])
+            print(x1[1][i])
+        print("\n")
 
         return [x1[0], x2[0]], x1[1]
 
