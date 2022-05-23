@@ -35,7 +35,7 @@ def build_model(learning_rate, n_classes,fine_tune,model_name,input_shape,image_
     elif clinical_model:
         model = clinic_model
     #optimizer = optimizers.Adam(clipvalue=0.5)
-    model.compile(tf.keras.optimizers.Adam(learning_rate=learning_rate,clipvalue=0.5),
+    model.compile(tf.keras.optimizers.Adam(learning_rate=learning_rate),
                   loss='categorical_crossentropy',
                   metrics=['accuracy'])
     model.summary()
