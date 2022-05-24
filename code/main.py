@@ -99,14 +99,13 @@ if __name__ == '__main__':
                               filter["only_tissue"],filter["canny"],filter["discard"],filter["crop"],
                               filter["resize"],filter["remove_blue_pen"],filter["remove_red_pen"],filter["remove_green_pen"],
                               filter["only_one_tissue"],filter["empty_threshold"],filter["canny_params"])
-    if args.mt:
-        print("modifying target column...")
-        util.modify_multiple_targets(PARAMS["modify_target"])
     if args.c:
         print("clasifying images...")
         clasify.clasify_multiple(PARAMS["clasify"])
         #clasify.clasify_images_oldv2(PARAMS["clasify"]["input"], PARAMS["clasify"]["imgdir"], PARAMS["clasify"]["sourceDir"], PARAMS["clasify"]["newDirTOsplitImages"],PARAMS["classification"])
-
+    if args.mt:
+        print("modifying target column...")
+        util.modify_multiple_targets(PARAMS["modify_target"])
     if args.t or args.e:
         # Sets up a timestamped log directory.
         log_dir = PARAMS["logdir"] + datetime.now().strftime("%Y%m%d-%H%M%S")
