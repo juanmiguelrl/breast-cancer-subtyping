@@ -142,16 +142,22 @@ class ClinicalDataGenerator(Sequence):
         self.datay = dfy
         self.on_epoch_end()
         self.mode = mode
-        dff = pd.DataFrame()
-        dff["t"] = pd.get_dummies(dfy).idxmax(1)
-        self.classes = dff.groupby("t").ngroup().to_numpy()
+        # dff = pd.DataFrame()
+        # dff["t"] = pd.get_dummies(dfy).idxmax(1)
+        # self.classes = dff.groupby("t").ngroup().to_numpy()
+        # self.class_indices = class_indices
+        # self.classes = dfy.map(dict)
 
         def generate_classes(df):
             target = pd.DataFrame()
             target["t"] = pd.get_dummies(df).idxmax(1)
+            l = []
+            for element in target["t"].unique():
+                l.append(element)
+            l = sorted(l)
             i = 0
             dict = {}
-            for element in target["t"].unique():
+            for element in l:
                 # add to dictionary with i
                 dict[element] = i
                 i += 1

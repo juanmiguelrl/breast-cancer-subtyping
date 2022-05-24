@@ -21,25 +21,27 @@ def simplify_stage(x):
     #check if x is string
     if isinstance(x, str):
         if "Stage IV" in x:
-            return 4
+            return "Stage IV"
         elif "Stage III" in x:
-            return 3
+            return "Stage III"
         elif "Stage II" in x:
-            return 2
+            return "Stage II"
         elif "Stage I" in x:
-            return 1
+            return "Stage I"
         else:
-            return 0
+            return "unknown"
     else:
         return 0
 
 def simplify(data,classification,target,simplify):
     if classification == "stage":
         data[target] = data["stage"].apply(simplify_stage)
+        data = data[data[target] != "unknown"]
     else:
         data[target] = data[classification]
     if simplify:
         data["stage_simplified"] = data["stage"].apply(simplify_stage)
+    return data
 
 
 def rchop(s, suffix):
@@ -63,7 +65,7 @@ def clasify_images(input,imgdir,classification,output_file,simplify_stage):
     data = data[data[classification].isnull() != True]
     #simplify classes
     target = "target"
-    simplify(data,classification,target,simplify_stage)
+    data = simplify(data,classification,target,simplify_stage)
     #to only take the files which are in the folder and not in the subfolders (so the discarded images are not taken)
     onlyfiles = [rchop(f,".png") for f in listdir(imgdir) if isfile(join(imgdir, f))]
     data["filename"] = data["filename"].apply(cut_svs)
