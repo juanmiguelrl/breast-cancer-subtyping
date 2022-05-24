@@ -175,6 +175,7 @@ class ClinicalDataGenerator(Sequence):
         batch = [self.indices[k] for k in index]
         # Generate data
         X, y = self.__get_data(batch)
+        # print(X)
         return X, y
 
     def on_epoch_end(self):
@@ -183,15 +184,15 @@ class ClinicalDataGenerator(Sequence):
             np.random.shuffle(self.index)
 
     def __get_data(self, batch):
-        print("******************")
-        print(batch)
-        print("******************")
+        # print("******************")
+        # print(batch)
+        # print("******************")
         # X =  self.df.loc[batch].values
         # y = self.dfy.loc[batch].values
         X = self.data.reindex(batch).values
         y = self.datay.reindex(batch).values
 
-        print(self.data.index.values.tolist())
+        # print(self.data.index.values.tolist())
 
         #X = self.df.loc[1].values
         #X = self.df[1]
@@ -224,13 +225,26 @@ class ClinicalDataGenerator(Sequence):
 # target = pd.get_dummies(target, columns=["target"])
 #############
 
+def removenan(x):
+    if x is np.nan:
+        return 0
+    else:
+        return x
+
 #process the data for the model which uses the clinical data
 def process_clinical_data(dataframe,parameters):
     cs = MinMaxScaler()
     data = dataframe.copy()
     #data.set_index("filepath", inplace=True)
     # data = data[parameters["continuos"] + parameters["categorical"] + ["target"]]
-    data = data[parameters["continuos"] + parameters["categorical"]]
+    for column in data:
+        if column in parameters["continuos"]:
+            #data[column].replace(np.nan, 0.1)
+            #data[column] = data[column].apply(removenan)
+            data[column].fillna(0.1, inplace=True)
+        if column in parameters["categorical"]:
+            data[column].replace(np.nan, "unknown")
+    data = data[parameters["continuos"] + parameters["categorical"] + ["target"]]
     data[parameters["continuos"]] = cs.fit_transform(data[parameters["continuos"]])
     data = pd.get_dummies(data, columns=parameters["categorical"])
 
@@ -333,12 +347,12 @@ class JoinedGen(tf.keras.utils.Sequence):
         # print(self.gen2.indices)
 
         #print each row of x1,x2
-        print("\n")
-        for i in range(0, len(x1[0])):
-            #print(x1[0][i])
-            print(x2[0][i])
-            print(x1[1][i])
-        print("\n")
+        # print("\n")
+        # for i in range(0, len(x1[0])):
+        #     #print(x1[0][i])
+        #     print(x2[0][i])
+        #     print(x1[1][i])
+        # print("\n")
 
         return [x1[0], x2[0]], x1[1]
 
