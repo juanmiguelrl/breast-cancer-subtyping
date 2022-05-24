@@ -241,7 +241,7 @@ def process_clinical_data(dataframe,parameters):
         if column in parameters["continuos"]:
             #data[column].replace(np.nan, 0.1)
             #data[column] = data[column].apply(removenan)
-            data[column].fillna(0.1, inplace=True)
+            data[column].fillna(0, inplace=True)
         if column in parameters["categorical"]:
             data[column].replace(np.nan, "unknown")
     data = data[parameters["continuos"] + parameters["categorical"] + ["target"]]
