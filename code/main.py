@@ -30,6 +30,8 @@ if __name__ == '__main__':
     parser.add_argument("--d", help="downscale wsi images", required=False, default=False, action="store_true")
     parser.add_argument("--s", help="store images together", required=False, default=False, action="store_true")
     parser.add_argument("--f", help="filters the images applying the options indicated", required=False, default=False, action="store_true")
+    parser.add_argument("--mt", help="modifies the target column of the dataframes indicated", required=False, default=False,
+                        action="store_true")
     parser.add_argument("--c", help="clasifies the images and slits them in train and test sets ", required=False,
                         default=False, action="store_true")
     parser.add_argument("--t", help="execute the training of the neural network", required=False, default=False, action="store_true")
@@ -97,11 +99,12 @@ if __name__ == '__main__':
                               filter["only_tissue"],filter["canny"],filter["discard"],filter["crop"],
                               filter["resize"],filter["remove_blue_pen"],filter["remove_red_pen"],filter["remove_green_pen"],
                               filter["only_one_tissue"],filter["empty_threshold"],filter["canny_params"])
+    if args.mt:
+        print("modifying target column...")
+        util.modify_multiple_targets(PARAMS["modify_target"])
     if args.c:
         print("clasifying images...")
-        clasify_img = {"simplify_stage": False}
-        clasify_img.update(PARAMS["clasify"])
-        clasify.clasify_images(clasify_img["input"], clasify_img["imgdir"], clasify_img["classification"], clasify_img["output_file"],clasify_img["simplify_stage"])
+        clasify.clasify_multiple(PARAMS["clasify"])
         #clasify.clasify_images_oldv2(PARAMS["clasify"]["input"], PARAMS["clasify"]["imgdir"], PARAMS["clasify"]["sourceDir"], PARAMS["clasify"]["newDirTOsplitImages"],PARAMS["classification"])
 
     if args.t or args.e:

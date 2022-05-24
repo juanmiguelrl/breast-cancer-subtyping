@@ -75,6 +75,12 @@ def clasify_images(input,imgdir,classification,output_file,simplify_stage):
     data.to_csv(output_file, sep="\t",index=False)
     return data
 
+def clasify_multiple(list_of_dictionaries):
+    for PARAMS in list_of_dictionaries:
+        clasify_img = {"simplify_stage": False}
+        clasify_img.update(PARAMS)
+        clasify_images(clasify_img["input"], clasify_img["imgdir"], clasify_img["classification"], clasify_img["output_file"],clasify_img["simplify_stage"])
+
 #####################################################################
 #if directory does not exist, create it
 def makedirectory(path):

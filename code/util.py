@@ -208,6 +208,40 @@ def join_data(data):
         df.to_csv(element["output_file"],sep="\t",index=False)
     return df
 
+
+def modify_target(dictionary):
+    def group_classes(df, dict):
+        data = df.copy()
+        # drop rows with the values specified
+        if "drop" in dict:
+            for element in dict["drop"]:
+                data = data[data["target"].str.contains(element) == False]
+        data["original_target"] = data["target"]
+
+        def group(x):
+            for key, element in dict["new_group_list"].items():
+                if x in element:
+                    return key
+            return dict["other_name"]
+
+        # make the new groups for the target
+        if dict["new_group"]:
+            data["target"] = data["target"].apply(group)
+        if dict["remove_other"]:
+            data = data[data["target"] != dict["other_name"]]
+        return data
+
+    dataframe = pd.read_csv(dictionary["input"], sep="\t")
+
+    data = group_classes(dataframe, dictionary)
+
+    data.to_csv(dictionary["output"], sep="\t", index=False)
+
+
+def modify_multiple_targets(list_of_dictionaries):
+    for element in list_of_dictionaries:
+        modify_target(element)
+
 #pd.merge(data, pam50[["BRCA_Subtype_PAM50"]], left_on="case_submitter_id",right_on="patient", right_index=True,how="left")
 
 
