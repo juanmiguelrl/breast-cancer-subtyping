@@ -50,8 +50,8 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
 
         clinical_train_target = pd.get_dummies(train_dataframe.copy()["target"], columns=["target"])
         clinical_test_target = pd.get_dummies(test_dataframe.copy()["target"], columns=["target"])
-        clinical_train_dataframe = train_dataframe.copy().drop(columns=["target"])
-        clinical_test_dataframe = test_dataframe.copy().drop(columns=["target"])
+        clinical_train_dataframe = train_dataframe.copy().drop(columns=["target","filepath"])
+        clinical_test_dataframe = test_dataframe.copy().drop(columns=["target","filepath"])
 
         # train_dataframe2, test_dataframe2 = train_test_split(dataframe2, test_size=parameters['validation_split'], stratify=dataframe["target"])
         # train_dataframe2 = train_dataframe2.reset_index(drop=True)

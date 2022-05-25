@@ -250,7 +250,7 @@ def process_clinical_data(dataframe,parameters):
             data[column].fillna(0, inplace=True)
         if column in parameters["categorical"]:
             data[column].replace(np.nan, "unknown")
-    data = data[parameters["continuos"] + parameters["categorical"] + ["target"]]
+    data = data[parameters["continuos"] + parameters["categorical"] + ["target","filepath"]]
     data[parameters["continuos"]] = cs.fit_transform(data[parameters["continuos"]])
     data = pd.get_dummies(data, columns=parameters["categorical"])
 
