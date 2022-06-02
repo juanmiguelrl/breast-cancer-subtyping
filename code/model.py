@@ -16,7 +16,7 @@ def build_image_model(learning_rate, n_classes,fine_tune,model_name,input_shape)
     elif model_name == "patches":
         return patches(learning_rate, n_classes,fine_tune)
     elif model_name == "xception":
-        return xception(learning_rate, n_classes,fine_tune)
+        return xception(learning_rate, n_classes,input_shape,fine_tune)
     else:
         return VGG16_model2(learning_rate, n_classes,fine_tune,input_shape)
 

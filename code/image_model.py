@@ -198,9 +198,8 @@ def patches(learning_rate, n_classes,fine_tune=0):
     model.summary()
     return model
 
-def xception(learning_rate, n_classes,fine_tune=0):
-    xception_model = Xception()
-
+def xception(learning_rate, n_classes,input_shape,fine_tune=0):
+    xception_model = Xception(weights="imagenet", include_top=False)
     # model = Sequential()
     # for layer in xception_model.layers[:-1]:
     #     model.add(layer)
@@ -220,9 +219,12 @@ def xception(learning_rate, n_classes,fine_tune=0):
     # model.compile(optimizer=Adam(learning_rate=learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
     # model.summary()
 
-
-    input = Input(shape=(299, 299, 3))
-    model = xception_model(input)
+    xception_model.trainable = False
+    input = Input(shape=input_shape)
+    xception = xception_model(input)
+    model = tf.keras.layers.GlobalAveragePooling2D()(xception)
     model = Dense(units=n_classes, activation='softmax') (model)
     model = Model(inputs=input, outputs=model)
+    # for layer in xception_model.layers:
+    #     layer.trainable = False
     return model

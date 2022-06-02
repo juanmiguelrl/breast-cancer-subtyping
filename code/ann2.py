@@ -99,7 +99,7 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
     else:
         preprocess_func = None
         target_size = parameters['target_size']
-
+    input_shape = (target_size[0],target_size[1],3)
 
 ############################################
     #prepare data generators for the images
@@ -168,7 +168,8 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
         steps_per_epoch = math.ceil(train_generator.n / parameters["batch_size"])
         validation_steps = math.ceil(validation_generator.n / parameters["batch_size"])
         n_classes = len(train_generator.class_indices)
-
+    print("\n\n\n")
+    print((input_shape))
         # print(train_generator.filenames)
         # print(train_generator.class_indices)
         # print(train_generator.samples)
@@ -191,11 +192,11 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
             devices=devices_names[:parameters["n_gpus"]])
 
         with strategy.scope():
-            model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"],(target_size,3),
+            model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"],input_shape,
                                 parameters["image_model"],parameters["clinical_model"],clinical_input_num)
             #model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"],parameters["target_size"])
     else:
-        model = build_model(parameters["learning_rate"], n_classes, parameters["fine_tune"], parameters["model_name"],(target_size,3),
+        model = build_model(parameters["learning_rate"], n_classes, parameters["fine_tune"], parameters["model_name"],input_shape,
                             parameters["image_model"], parameters["clinical_model"], clinical_input_num)
         #model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"],parameters["target_size"])
 
@@ -274,7 +275,9 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
         epochs=parameters["epochs"],
         callbacks=callbacks,
         class_weight=class_weight,
-        verbose=verbose
+        verbose=verbose,
+        use_multiprocessing=True,
+        workers = 4
         #,drop_remainder=True
     )
 
