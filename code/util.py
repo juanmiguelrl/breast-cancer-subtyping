@@ -1,7 +1,14 @@
 import requests
 import json
 import pandas as pd
+import sklearn
+from collections import Counter
 
+def calculate_class_weights(train_generator):
+    counter = Counter(train_generator.classes)
+    max_val = float(max(counter.values()))
+    class_weight = {class_id: max_val / num_images for class_id, num_images in counter.items()}
+    return class_weight
 
 def download_manifest_from_GDC(output_file,projects,name_restrictions,files_data_format="svs",
                                experimental_strategy="Tissue Slide",endpoint='https://api.gdc.cancer.gov/files'):
@@ -242,107 +249,15 @@ def modify_multiple_targets(list_of_dictionaries):
     for element in list_of_dictionaries:
         modify_target(element)
 
-#pd.merge(data, pam50[["BRCA_Subtype_PAM50"]], left_on="case_submitter_id",right_on="patient", right_index=True,how="left")
+def split_Dataframe(parameters):
+    dataframe = pd.read_csv(parameters["dataframe"], sep='\t', header=0)
+    train_dataframe, val_dataframe = sklearn.model_selection.train_test_split(dataframe, test_size=parameters['validation_split'],
+                                                       stratify=dataframe["target"])
+    train_dataframe.to_csv(parameters["output_train"], sep='\t', index=False)
+    val_dataframe.to_csv(parameters["output_val"], sep='\t', index=False)
+    return
 
-
-import tensorflow as tf
-import numpy as np
-
-# class DataGenerator(tf.keras.utils.Sequence):
-#     def __init__(self, df, x_col, y_col=None, batch_size=32, num_classes=None, shuffle=True):
-#         self.batch_size = batch_size
-#         self.df = dataframe
-#         self.indices = self.df.index.tolist()
-#         self.num_classes = num_classes
-#         self.shuffle = shuffle
-#         self.x_col = x_col
-#         self.y_col = y_col
-#         self.on_epoch_end()
-#
-#     def __len__(self):
-#         return len(self.indices) // self.batch_size)
-#
-#         def __getitem__(self, index):
-#             index = self.index[index * self.batch_size:(index + 1) * self.batch_size]
-#             batch = [self.indices[k] for k in index]
-#
-#             X, y = self.__get_data(batch)
-#             return X, y
-#
-#         def on_epoch_end(self):
-#             self.index = np.arange(len(self.indices))
-#             if self.shuffle == True:
-#                 np.random.shuffle(self.index)
-#
-#         def __get_data(self, batch):
-#             X =  # logic
-#             y =  # logic
-#
-#             for i, id in enumerate(batch):
-#                 X[i,] =  # logic
-#                 y[i] =  # labels
-#
-#             return X, y
-#
-#
-# from keras.preprocessing.image import Iterator, ImageDataGenerator
-#
-#
-# import os
-# import random
-# import pandas as pd
-#
-# def generator(image_dir, csv_dir, batch_size):
-#     i = 0
-#     image_file_list = os.listdir(image_dir)
-#     while True:
-#         batch_x = {'images': list(), 'other_feats': list()}  # use a dict for multiple inputs
-#         batch_y = list()
-#         for b in range(batch_size):
-#             if i == len(image_file_list):
-#                 i = 0
-#                 random.shuffle(image_file_list)
-#             sample = image_file_list[i]
-#             image_file_path = sample[0]
-#             csv_file_path = os.path.join(csv_dir,
-#                                          os.path.basename(image_file_path).replace('.png', '.csv'))
-#             i += 1
-#             image = preprocess_image(cv2.imread(image_file_path))
-#             csv_file = pd.read_csv(csv_file_path)
-#             other_feat = preprocess_feats(csv_file)
-#             batch_x['images'].append(image)
-#             batch_x['other_feats'].append(other_feat)
-#             batch_y.append(csv_file.loc[image_name, :]['class'])
-#
-#         batch_x['images'] = np.array(batch_x['images'])  # convert each list to array
-#         batch_x['other_feats'] = np.array(batch_x['other_feats'])
-#         batch_y = np.eye(num_classes)[batch['labels']]
-#         yield batch_x, batch_y
-#
-#
-#
-# class JoinedGen(tf.keras.utils.Sequence):
-#     def __init__(self, img_gen, dataframe, target_gen):
-#         self.img_gen = img_gen
-#         self.dataframe = dataframe
-#
-#         assert len(input_gen1) == len(input_gen2) == len(target_gen)
-#
-#     def __len__(self):
-#         return len(self.gen1)
-#
-#     def __getitem__(self, i):
-#         x1 = self.gen1[i]
-#         x2 = self.gen2[i]
-#         y = self.gen3[i]
-#
-#         return [x1, x2], y
-#
-#     def on_epoch_end(self):
-#         self.gen1.on_epoch_end()
-#         self.gen2.on_epoch_end()
-#         self.gen3.on_epoch_end()
-#         self.gen2.index_array = self.gen1.index_array
-#         self.gen3.index_array = self.gen1.index_array
-#
-#
+def multiple_split_dataframe(list_of_dictionaries):
+    for parameters in list_of_dictionaries:
+        split_Dataframe(parameters)
+    return

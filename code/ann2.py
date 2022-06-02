@@ -11,7 +11,7 @@ from tensorflow import keras
 import sklearn.metrics
 from eval import  plot_confusion_matrix,plot_to_image,confusion_matrix_callback,log_learning_rate_callback, log_nni_callback
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from utils import calculate_class_weights
+from util import calculate_class_weights
 from tensorflow.python.client import device_lib
 from sklearn.model_selection import train_test_split
 

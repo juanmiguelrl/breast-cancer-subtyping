@@ -114,6 +114,17 @@ Compulsory:
 &emsp;&emsp;other_name : The name that will be used to rename all the values which are not in the new_group list (if new_group is set to true)  
 &emsp; remove_other : Boolean, if true it will remove all the rows with the value specified in other_name in the target column (this is executed after new_group)  
 
+### Split dataframe (--sd): 
+(This option splits the dataframes provided into 2 dataframes with the same ratio of each class than the original)  
+List of dictionaries containing each one:  
+&emsp;dataframe: Path to the dataframe to be splitted.  
+&emsp;validation_split: Number between 0 and 1 which indicates which percentage of the dataframe goes to each new dataframe (0.4 for example will result in the first dataframe having 60% of the data and the second one having a 40%)   
+&emsp;target: The column of the dataframe with the classes that will be used to stratify (divides in the same ratio)  
+&emsp;output_train: Path where the first resulting dataframe will be stored  
+&emsp;output_val: Path where the second resulting dataframe will be stored  
+(being a list allows to for example make a first split into 60% for training and 40% for other dataframe that in the next element of the list can be splitted 50% to have a train dataframe with 20% of the original data and a test dataframe with another 20% of the original data)
+
+
 ### Train options in json (--t): (not finished yet) 
 Compulsory:  
 &emsp;balance_data : boolean, if true it balance the data taking randomly the same amount of samples of each clasify option
