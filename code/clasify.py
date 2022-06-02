@@ -81,6 +81,25 @@ def clasify_multiple(list_of_dictionaries):
         clasify_img.update(PARAMS)
         clasify_images(clasify_img["input"], clasify_img["imgdir"], clasify_img["classification"], clasify_img["output_file"],clasify_img["simplify_stage"])
 
+def dataframe_from_directory(imgdir,extension,output_file):
+    data = pd.DataFrame([])
+    #for each folder of the directory, it classifies the images into a dataframe
+    for folder in os.listdir(imgdir):
+        if os.path.isdir(os.path.join(imgdir, folder)):
+            #print(folder)
+            #for each file in the folder, it adds the filepath and the classification
+            for filename in os.listdir(os.path.join(imgdir, folder)):
+                if filename.endswith(extension):
+                    data = data.append(pd.DataFrame({"filename": [filename], "target": [folder]}),ignore_index = True)
+    data.to_csv(output_file, sep="\t",index=False)
+
+def dataframe_from_directory_multiple(list_of_dictionaries):
+    for PARAMS in list_of_dictionaries:
+        clasify_img = {"simplify_stage": False}
+        clasify_img.update(PARAMS)
+        dataframe_from_directory(clasify_img["imgdir"], clasify_img["extension"], clasify_img["output_file"])
+
+
 #####################################################################
 #if directory does not exist, create it
 def makedirectory(path):

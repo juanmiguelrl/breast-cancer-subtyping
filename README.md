@@ -82,6 +82,13 @@ Optional:
 &emsp;remove_green_pen : bool to indicate if remove the green pen marks in the slides or not  
 &emsp;only_one_tissue : bool to indicate if leave only the biggest tissue connected component or leave all  
 
+### Clasify images from directory folders to dataframe (--cf): 
+(This option stores in a new dataframe the images paths with a "target" column with the classification which the folders containing them have as name)  
+List of dictionaries containing each one:  
+&emsp;imgdir: Path to the directory which contains the folders of each class of images  
+&emsp;extension: The extension of the images (to don`t get other type of files into the dataframe)  
+&emsp;output_file: Path where the resulting dataframe will be stored  
+
 ### Clasify options in json (--c): 
 (This option stores in a new dataframe the images paths with a "target" column with the classification to be used)  
 List of dictionaries containing each one:  

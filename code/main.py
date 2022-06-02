@@ -32,7 +32,9 @@ if __name__ == '__main__':
     parser.add_argument("--f", help="filters the images applying the options indicated", required=False, default=False, action="store_true")
     parser.add_argument("--mt", help="modifies the target column of the dataframes indicated", required=False, default=False,
                         action="store_true")
-    parser.add_argument("--c", help="clasifies the images and slits them in train and test sets ", required=False,
+    parser.add_argument("--cf", help="clasifies the images from a directory into a dataframe", required=False,
+                        default=False, action="store_true")
+    parser.add_argument("--c", help="clasifies the images and splits them in train and test sets ", required=False,
                         default=False, action="store_true")
     parser.add_argument("--t", help="execute the training of the neural network", required=False, default=False, action="store_true")
     parser.add_argument("--e", help="evaluate the model indicated with the dataset indicated", required=False, default=False, action="store_true")
@@ -99,6 +101,9 @@ if __name__ == '__main__':
                               filter["only_tissue"],filter["canny"],filter["discard"],filter["crop"],
                               filter["resize"],filter["remove_blue_pen"],filter["remove_red_pen"],filter["remove_green_pen"],
                               filter["only_one_tissue"],filter["empty_threshold"],filter["canny_params"])
+    if args.cf:
+        print("clasifying images...")
+        clasify.dataframe_from_directory_multiple(PARAMS["dataframe_from_directory"])
     if args.c:
         print("clasifying images...")
         clasify.clasify_multiple(PARAMS["clasify"])
