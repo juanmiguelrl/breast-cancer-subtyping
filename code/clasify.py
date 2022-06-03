@@ -89,8 +89,9 @@ def dataframe_from_directory(imgdir,extension,output_file):
             #print(folder)
             #for each file in the folder, it adds the filepath and the classification
             for filename in os.listdir(os.path.join(imgdir, folder)):
+                path = os.path.join(imgdir, folder)
                 if filename.endswith(extension):
-                    data = data.append(pd.DataFrame({"filename": [filename], "target": [folder]}),ignore_index = True)
+                    data = data.append(pd.DataFrame({"filepath": [os.path.join(path,filename)], "target": [folder]}),ignore_index = True)
     data.to_csv(output_file, sep="\t",index=False)
 
 def dataframe_from_directory_multiple(list_of_dictionaries):

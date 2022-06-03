@@ -23,14 +23,22 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
 
 ############################################
     #dataframe
-    dataframe = pd.read_csv(parameters['dataframe_path'],sep="\t")
+    train_dataframe = pd.read_csv(parameters['train_dataframe'],sep="\t")
+    test_dataframe = pd.read_csv(parameters['val_dataframe'], sep="\t")
     if parameters["balance_data"]:
-        print("before balance\n")
-        print(dataframe["target"].value_counts())
-        g = dataframe.groupby('target')
-        dataframe = g.apply(lambda x: x.sample(g.size().min()).reset_index(drop=True)).reset_index(drop=True)
-        print("after balance\n")
-        print(dataframe["target"].value_counts())
+        print("train before balance\n")
+        print(train_dataframe["target"].value_counts())
+        g = train_dataframe.groupby('target')
+        train_dataframe = g.apply(lambda x: x.sample(g.size().min()).reset_index(drop=True)).reset_index(drop=True)
+        print("train after balance\n")
+        print(train_dataframe["target"].value_counts())
+
+        print("validation before balance\n")
+        print(test_dataframe["target"].value_counts())
+        g = test_dataframe.groupby('target')
+        test_dataframe = g.apply(lambda x: x.sample(g.size().min()).reset_index(drop=True)).reset_index(drop=True)
+        print("validation after balance\n")
+        print(test_dataframe["target"].value_counts())
 
 
 
@@ -38,31 +46,16 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
 ############################################
     #prepare data generators with clinical data
     if parameters["clinical_model"]:
-
-        dataframe2 = dataframe.copy()
-
-        dataframe,_ = process_clinical_data(dataframe,parameters["clinical_columns"])
-        train_dataframe, test_dataframe = train_test_split(dataframe, test_size=parameters['validation_split'], stratify=dataframe["target"])
-        train_dataframe = train_dataframe.reset_index(drop=True)
-        test_dataframe = test_dataframe.reset_index(drop=True)
-        #train_dataframe["age_at_initial_pathologic_diagnosis2"] = train_dataframe["age_at_initial_pathologic_diagnosis"]
-        #test_dataframe["age_at_initial_pathologic_diagnosis2"] = test_dataframe["age_at_initial_pathologic_diagnosis"]
+        train_dataframe = process_clinical_data(train_dataframe,parameters["clinical_columns"])[0].reset_index(drop=True)
+        test_dataframe = process_clinical_data(test_dataframe,parameters["clinical_columns"])[0].reset_index(drop=True)
 
         clinical_train_target = pd.get_dummies(train_dataframe.copy()["target"], columns=["target"])
         clinical_test_target = pd.get_dummies(test_dataframe.copy()["target"], columns=["target"])
         clinical_train_dataframe = train_dataframe.copy().drop(columns=["target","filepath"])
         clinical_test_dataframe = test_dataframe.copy().drop(columns=["target","filepath"])
 
-        # train_dataframe2, test_dataframe2 = train_test_split(dataframe2, test_size=parameters['validation_split'], stratify=dataframe["target"])
-        # train_dataframe2 = train_dataframe2.reset_index(drop=True)
-        # test_dataframe2 = test_dataframe2.reset_index(drop=True)
-        #
-        # clinical_train_dataframe2,clinical_train_target2 = process_clinical_data(train_dataframe2,parameters["clinical_columns"])
-        # clinical_test_dataframe2, clinical_test_target2 = process_clinical_data(test_dataframe2,parameters["clinical_columns"])
-
         train_datagen_clinical = ClinicalDataGenerator(clinical_train_dataframe,clinical_train_target,batch_size=parameters['batch_size'])
         test_datagen_clinical = ClinicalDataGenerator(clinical_test_dataframe, clinical_test_target,batch_size=parameters['batch_size'],shuffle=False)
-        #train_clinical,test_clinical = load_clinical_data(parameters["clinical_columns"],train_dataframe,test_dataframe,dataframe)
         n_classes = clinical_train_target.shape[1]
         clinical_input_num = clinical_train_dataframe.shape[1]
 
@@ -76,7 +69,6 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
     else:
         n_classes = 0
         clinical_input_num = 0
-        train_dataframe, test_dataframe = train_test_split(dataframe, test_size=parameters['validation_split'], stratify=dataframe["target"])
         train_dataframe = train_dataframe.reset_index(drop=True)
         test_dataframe = test_dataframe.reset_index(drop=True)
 
