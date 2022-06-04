@@ -44,8 +44,7 @@ def VGG16_model(learning_rate, n_classes,fine_tune,input_shape):
 
 
 def VGG16_model2(learning_rate, n_classes,fine_tune,input_shape):
-    vgg16_model = tf.keras.applications.vgg16.VGG16()
-
+    vgg16_model = tf.keras.applications.vgg16.VGG16(weights="imagenet", include_top=False)
 
     # model = Sequential()
     # for layer in vgg16_model.layers[:-1]:
@@ -66,8 +65,15 @@ def VGG16_model2(learning_rate, n_classes,fine_tune,input_shape):
     # model.compile(optimizer=Adam(learning_rate=learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
     # model.summary()
 
-    input = Input(shape=(224, 224, 3))
-    model = vgg16_model(input)
+    # input = Input(shape=(224, 224, 3))
+    # model = vgg16_model(input)
+    # model = Dense(units=n_classes, activation='softmax') (model)
+    # model = Model(inputs=input, outputs=model)
+
+    vgg16_model.trainable = False
+    input = Input(shape=input_shape)
+    vgg16 = vgg16_model(input)
+    model = tf.keras.layers.GlobalAveragePooling2D()(vgg16)
     model = Dense(units=n_classes, activation='softmax') (model)
     model = Model(inputs=input, outputs=model)
 
@@ -94,23 +100,30 @@ def conv_model2(learning_rate, n_classes,fine_tune=0):
     # model.summary()
     return model
 
-def mobile_net_model(learning_rate, n_classes,fine_tune=0):
-    mobile_net = tf.keras.applications.MobileNetV2(input_shape=(224, 224, 3), include_top=False)
+def mobile_net_model(learning_rate, n_classes,fine_tune,input_shape):
+    mobile_net = tf.keras.applications.MobileNetV2(weights="imagenet", include_top=False)
     mobile_net.trainable = False  # keeeping mobile net weights same
 
-    trf_learn = Sequential()
-
-    trf_learn.add(mobile_net)
-    trf_learn.add(Flatten())
-
-    trf_learn.add(Dense(units=32, activation="relu"))
-    trf_learn.add(Dense(units=1, activation="sigmoid"))
+    # trf_learn = Sequential()
+    #
+    # trf_learn.add(mobile_net)
+    # trf_learn.add(Flatten())
+    #
+    # trf_learn.add(Dense(units=32, activation="relu"))
+    # trf_learn.add(Dense(units=1, activation="sigmoid"))
 
     # trf_learn.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
     #
     # trf_learn.summary()
 
-    return trf_learn
+    #mobile_net.trainable = False
+    input = Input(shape=input_shape)
+    mobile = mobile_net(input)
+    model = tf.keras.layers.GlobalAveragePooling2D()(mobile)
+    model = Dense(units=n_classes, activation='softmax') (model)
+    model = Model(inputs=input, outputs=model)
+
+    return model
 
 def conv_model(learning_rate, n_classes,fine_tune=0):
     model = Sequential()

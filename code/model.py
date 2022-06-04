@@ -7,10 +7,10 @@ from tensorflow.keras import optimizers
 
 
 def build_image_model(learning_rate, n_classes,fine_tune,model_name,input_shape):
-    if model_name == "vgg16":
-        return VGG16_model(learning_rate, n_classes,fine_tune,input_shape)
+    if model_name == "VGG16":
+        return VGG16_model2(learning_rate, n_classes,fine_tune,input_shape)
     elif model_name == "mobile_net":
-        return mobile_net_model(learning_rate, n_classes,fine_tune)
+        return mobile_net_model(learning_rate, n_classes,fine_tune,input_shape)
     elif model_name == "conv":
         return conv_model(learning_rate, n_classes,fine_tune)
     elif model_name == "patches":
@@ -18,7 +18,8 @@ def build_image_model(learning_rate, n_classes,fine_tune,model_name,input_shape)
     elif model_name == "xception":
         return xception(learning_rate, n_classes,input_shape,fine_tune)
     else:
-        return VGG16_model2(learning_rate, n_classes,fine_tune,input_shape)
+        raise ValueError("model_name must be one of VGG16, mobile_net, conv, patches, xception")
+        #return VGG16_model2(learning_rate, n_classes,fine_tune,input_shape)
 
 def build_model(learning_rate, n_classes,fine_tune,model_name,input_shape,image_model=True,clinical=False,clinical_num=0):
     if image_model:
