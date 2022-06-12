@@ -78,19 +78,19 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
     if parameters['preprocessing_function']:
         if parameters['model_name'] == 'VGG16':
             preprocess_func = tf.keras.applications.vgg16.preprocess_input
-            target_size = (224,224)
+            #target_size = (224,224)
         elif parameters['model_name'] == 'mobile_net':
             preprocess_func = tf.keras.applications.mobilenet_v2.preprocess_input
-            target_size = (224,224)
+            #target_size = (224,224)
         elif parameters['model_name'] == 'xception':
             preprocess_func = tf.keras.applications.xception.preprocess_input
-            target_size = (299, 299)
+            #target_size = (299, 299)
         else:
             preprocess_func = None
-            target_size = (224,224)
+            #target_size = (224,224)
     else:
         preprocess_func = None
-        target_size = parameters['target_size']
+    target_size = parameters['target_size']
     input_shape = (target_size[0],target_size[1],3)
 
 ############################################
@@ -258,6 +258,10 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
         callbacks.append(log_nni_callback())
     else:
         verbose = 1
+
+    print("validation steps: "+str(validation_steps))
+    print("steps per epoch: "+str(steps_per_epoch))
+    print("\n\n\n")
 
     model.fit(
         train_generator_definitive,
