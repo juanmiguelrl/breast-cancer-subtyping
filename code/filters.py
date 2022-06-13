@@ -468,7 +468,7 @@ def crop_resize_image(original_image,resize_size):
 
 def mask_list(input_dir,destination_path,resize_size,only_tissue,canny,discard,crop,resize,
               remove_blue,remove_red,remove_green,only_one,empty_threshold,canny_params):
-    for img in glob.glob(input_dir):
+    for img in glob.glob(os.path.join(input_dir,"*")):
       #check if is an file
       if os.path.isfile(img):
         np_img = np.asarray(Image.open(img).convert('RGB'))
@@ -491,10 +491,12 @@ def mask_list(input_dir,destination_path,resize_size,only_tissue,canny,discard,c
           np_img = np_img.convert('RGB')
         if check or not discard:
           #np_img.show()
-          np_img.save(destination_path+remove_suffix(remove_prefix(img,input_dir.rsplit('\\', 1)[0]),".png")+".png")
+          #np_img.save(destination_path+remove_suffix(remove_prefix(img,input_dir.rsplit('\\', 1)[0]),".png")+".png")
+          np_img.save(os.path.join(destination_path,os.path.basename(img)))
         else:
           #np_img.show()
-          np_img.save(destination_path+remove_suffix("/discarded/"+remove_prefix(img,input_dir.rsplit('\\', 1)[0]),".png")+".png")
+          #np_img.save(destination_path+remove_suffix("/discarded/"+remove_prefix(img,input_dir.rsplit('\\', 1)[0]),".png")+".png")
+          np_img.save( os.path.join(os.path.join(destination_path,"discarded"), os.path.basename(img)))
 
 def filter_images(input_dir,destination_path,resize_size=(896,896),only_tissue=True,canny=False,discard=True,crop=True,
                   resize=True,remove_blue=False,remove_red=False,remove_green=False,only_one=True,empty_threshold=0.5,
