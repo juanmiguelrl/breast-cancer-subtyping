@@ -507,3 +507,14 @@ def filter_images(input_dir,destination_path,resize_size=(896,896),only_tissue=T
 
   mask_list(input_dir,destination_path,resize_size,only_tissue,canny,discard,crop,resize,remove_blue,remove_red,remove_green,
             only_one,empty_threshold,canny_params)
+
+def filter_images_multiple(list_of_dictionaries):
+    for PARAMS in list_of_dictionaries:
+        filter = {"resize_size": (896,896) ,"only_tissue":True,"canny":False,"discard":True,"crop":True,
+                  "resize":True,"remove_blue_pen":False,"remove_red_pen":False,"remove_green_pen":False,"only_one_tissue":True,"empty_threshold":0.5,
+                  "canny_params":{"sigma":1.0,"low_threshold":0,"high_threshold":25}}
+        filter.update(PARAMS)
+        filter_images(filter["input_dir"], filter["destination_path"], filter["resize_size"],
+                              filter["only_tissue"],filter["canny"],filter["discard"],filter["crop"],
+                              filter["resize"],filter["remove_blue_pen"],filter["remove_red_pen"],filter["remove_green_pen"],
+                              filter["only_one_tissue"],filter["empty_threshold"],filter["canny_params"])

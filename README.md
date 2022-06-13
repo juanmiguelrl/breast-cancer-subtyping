@@ -65,6 +65,7 @@ Optional:
 &emsp;command_for_gdc_client : The command for the gdc-client in case it can be called directly
 
 ### Preprocess filter options in json (--f):  
+List of dictionaries containing each one:  
 Compulsory:  
 &emsp;input_dir : directory path with the images to preprocess (written in the format "directory\\*")  
 &emsp;destination_path : directory path to store the preprocessed images  
