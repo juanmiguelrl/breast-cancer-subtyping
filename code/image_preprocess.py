@@ -11,6 +11,8 @@ import pandas as pd
 
 
 def downscale_from_manifest(manifestdirectory,svsdirectory,outputDirectory,scale,store_together,openslide_path):
+    svsdirectory = svsdirectory.replace("\\","/")
+    outputDirectory = outputDirectory.replace("\\", "/")
     ###############################################
     #to fix the issues with openslide in windows
     if openslide_path:
@@ -32,6 +34,12 @@ def downscale_from_manifest(manifestdirectory,svsdirectory,outputDirectory,scale
         return input_string
 
     ###############
+    def remove_prefix(text, prefix):
+        if text.startswith(prefix):
+            return text[len(prefix):]
+        return text
+
+    ###############
 
     def downscale(path, SCALE_FACTOR):
         slide = openslide.open_slide(path)
@@ -46,26 +54,40 @@ def downscale_from_manifest(manifestdirectory,svsdirectory,outputDirectory,scale
 
 
     ###############################################
-    if os.path.isfile(manifestdirectory) == True:
-        manifest = pd.read_csv(manifestdirectory,sep = "\t")
-        dir = list(manifest["id"])
-        filename = list(manifest["filename"])
+    if (not manifestdirectory) or os.path.isfile(manifestdirectory) == True:
         not_processed = []
+        if manifestdirectory and os.path.isfile(manifestdirectory) == True:
+            manifest = pd.read_csv(manifestdirectory,sep = "\t")
+            dir = list(manifest["id"])
+            filename = list(manifest["filename"])
+        else:
+            dir = []
+            filename = []
+            for root, dirs, files in os.walk(svsdirectory):
+                for f in files:
+                    filename.append(f)
+                    root = root.replace("\\", "/")
+                    dir.append(remove_prefix(remove_prefix(root,"/"),svsdirectory))
+            # print(dir)
+            # print(filename)
+            # print(len(dir))
+            # print(len(filename))
         for i in range(0,len(dir)):
             #path = os.path.join(svsdirectory,dir[i],filename[i])
             path = (svsdirectory + "/" + dir[i] + "/" + filename[i])
             #print(filename[i])
             if store_together:
-                out_path = os.path.join(outputDirectory,remove_suffix(filename[i],".svs") + ".png")
+                out_path = os.path.join(outputDirectory,remove_suffix(filename[i],".svs")) + ".png"
             else:
-                out_path = (os.path.join(os.path.join(outputDirectory,dir[i]),remove_suffix(filename[i],".svs") + ".png"))
+                out_path = os.path.join((outputDirectory +dir[i]),remove_suffix(filename[i],".svs")) + ".png"
             #print(path)
-            if (os.path.isfile(path) == True) and (os.path.isfile(out_path) == False):
+            #print(os.path.join((outputDirectory +dir[i]),remove_suffix(filename[i],".svs")) + ".png")
+            if (os.path.isfile(path) == True) and (os.path.isfile(out_path) == False) and path.endswith(".svs"):
                 try:
                     img = downscale(path,scale)
                     os.makedirs(os.path.dirname(out_path), exist_ok=True)
                     img.save(out_path)
-                    print("image saved")
+                    print("image saved as: ", out_path)
                     print("found file: " + path + "\n")
                 #else:
                     #print("not found file: " + path + "\n")

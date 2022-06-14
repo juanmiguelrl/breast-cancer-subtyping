@@ -88,7 +88,7 @@ if __name__ == '__main__':
 
     if args.d:
         print("dowsncaling...")
-        downscale = {"openslide_path": None}
+        downscale = {"openslide_path": None,"manifest_path" : None,"store_together":True}
         downscale.update(PARAMS["downscale"])
         image_preprocess.downscale_from_manifest(downscale["manifest_path"], downscale["svsdirectory"], downscale["outputDirectory"], downscale["scale"],downscale["store_together"],downscale["openslide_path"])
     if args.s:
