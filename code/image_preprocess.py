@@ -10,12 +10,11 @@ import pandas as pd
 
 
 
-def downscale_from_manifest(manifestdirectory,svsdirectory,outputDirectory,scale,windows):
+def downscale_from_manifest(manifestdirectory,svsdirectory,outputDirectory,scale,store_together,openslide_path):
     ###############################################
     #to fix the issues with openslide in windows
-    if windows:
-        os.add_dll_directory('D://onedriveudc//OneDrive - Universidade da Coruña//tfg//python//openslide//bin')
-        openslide_path = 'D://onedriveudc//OneDrive - Universidade da Coruña//tfg//python//openslide//bin'
+    if openslide_path:
+        os.add_dll_directory(openslide_path)
         os.environ['PATH'] = openslide_path + ";" + os.environ['PATH']
     import openslide
     ###############################################
@@ -56,7 +55,10 @@ def downscale_from_manifest(manifestdirectory,svsdirectory,outputDirectory,scale
             #path = os.path.join(svsdirectory,dir[i],filename[i])
             path = (svsdirectory + "/" + dir[i] + "/" + filename[i])
             #print(filename[i])
-            out_path = (outputDirectory + "/" + dir[i] + "/" + remove_suffix(filename[i],".svs") + ".png")
+            if store_together:
+                out_path = os.path.join(outputDirectory,remove_suffix(filename[i],".svs") + ".png")
+            else:
+                out_path = (os.path.join(os.path.join(outputDirectory,dir[i]),remove_suffix(filename[i],".svs") + ".png"))
             #print(path)
             if (os.path.isfile(path) == True) and (os.path.isfile(out_path) == False):
                 try:

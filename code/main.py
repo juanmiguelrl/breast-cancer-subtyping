@@ -88,7 +88,9 @@ if __name__ == '__main__':
 
     if args.d:
         print("dowsncaling...")
-        image_preprocess.downscale_from_manifest(PARAMS["downscale"]["manifest_path"], PARAMS["downscale"]["svsdirectory"], PARAMS["downscale"]["outputDirectory"], PARAMS["downscale"]["scale"],PARAMS["downscale"]["windows"])
+        downscale = {"openslide_path": None}
+        downscale.update(PARAMS["downscale"])
+        image_preprocess.downscale_from_manifest(downscale["manifest_path"], downscale["svsdirectory"], downscale["outputDirectory"], downscale["scale"],downscale["store_together"],downscale["openslide_path"])
     if args.s:
         print("storing images together...")
         store_images.store_images_together(PARAMS["store"]["destination_path"], PARAMS["store"]["input_dir"])

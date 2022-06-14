@@ -72,6 +72,9 @@ def clasify_images(input,imgdir,classification,output_file,simplify_stage):
     data = data[data["filename"].isin(onlyfiles)]
     data["filepath"] = imgdir + os.path.sep + data["filename"].astype(str) + ".png"
     data["filepath"] = data["filepath"].replace("/", "\\")
+    outdir = os.path.dirname(output_file)
+    if not os.path.exists(outdir):
+        os.mkdir(outdir)
     data.to_csv(output_file, sep="\t",index=False)
     return data
 
@@ -92,6 +95,9 @@ def dataframe_from_directory(imgdir,extension,output_file):
                 path = os.path.join(imgdir, folder)
                 if filename.endswith(extension):
                     data = data.append(pd.DataFrame({"filepath": [os.path.join(path,filename)], "target": [folder]}),ignore_index = True)
+    outdir = os.path.dirname(output_file)
+    if not os.path.exists(outdir):
+        os.mkdir(outdir)
     data.to_csv(output_file, sep="\t",index=False)
 
 def dataframe_from_directory_multiple(list_of_dictionaries):

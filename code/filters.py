@@ -11,6 +11,11 @@ import math
 import os
 import skimage.feature as sk_feature
 
+import glob
+import shutil
+import os
+from PIL import Image
+Image.MAX_IMAGE_PIXELS = 3000000000
 #to store all the reduced images in one folder (to revise them visually without going through a lot of folders)    
 
 
@@ -444,10 +449,7 @@ def remove_prefix(text, prefix):
     return text[len(prefix):]
   return text
 ###############
-import glob
-import shutil
-import os
-from PIL import Image
+
 
 def get_filename(path):
     return path.split('\\')[-1]

@@ -64,6 +64,18 @@ Optional:
 &emsp;executable_path_file : The path where the gdc-client is  
 &emsp;command_for_gdc_client : The command for the gdc-client in case it can be called directly
 
+### Slides downscale options in json (--d) (it requires openslide): 
+Compulsory:  
+&emsp;svsdirectory : The path to the directory with the slides to downscale   
+&emsp;manifest_path : The path to the manifest file  
+&emsp;outputDirectory : The path to the directory where the downscaled slides will be stored(in .png format)  
+&emsp;scale : The scale in which the slide will be downscaled.
+Optional:  
+&emsp;openslide_path : The openslide path (for windows because openslide sometimes gives problems with its path in windows)  
+&emsp;store_together : Boolean to indicate if true that all the output files are wanted to be stored in the &emsp;same directory, or if false to store them in the directories of the original directory structure from the GDC  
+
+
+
 ### Preprocess filter options in json (--f):  
 List of dictionaries containing each one:  
 Compulsory:  
