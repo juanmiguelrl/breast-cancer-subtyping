@@ -209,11 +209,11 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
             devices=devices_names[:parameters["n_gpus"]])
 
         with strategy.scope():
-            model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"],input_shape,
+            model = build_model(parameters["dropout"],parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"],input_shape,
                                 parameters["image_model"],parameters["clinical_model"],clinical_input_num)
             #model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"],parameters["target_size"])
     else:
-        model = build_model(parameters["learning_rate"], n_classes, parameters["fine_tune"], parameters["model_name"],input_shape,
+        model = build_model(parameters["dropout"],parameters["learning_rate"], n_classes, parameters["fine_tune"], parameters["model_name"],input_shape,
                             parameters["image_model"], parameters["clinical_model"], clinical_input_num)
         #model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"],parameters["target_size"])
 

@@ -8,7 +8,7 @@ from tensorflow.keras.optimizers import Adam, Adagrad
 from tensorflow.keras import Input
 from tensorflow.keras import Input,Model
 
-def VGG16_model(learning_rate, n_classes,fine_tune,input_shape):
+def VGG16_model(dropout,learning_rate, n_classes,fine_tune,input_shape):
     conv_base = VGG16(input_shape=(224, 224, 3),
                               include_top=False,
                               weights='imagenet')
@@ -29,7 +29,8 @@ def VGG16_model(learning_rate, n_classes,fine_tune,input_shape):
     top_model = tf.keras.layers.Flatten(name="flatten")(top_model)
     top_model = tf.keras.layers.Dense(4096, activation='relu')(top_model)
     top_model = tf.keras.layers.Dense(1072, activation='relu')(top_model)
-    top_model = tf.keras.layers.Dropout(0.2)(top_model)
+    if dropout > -1:
+        top_model = tf.keras.layers.Dropout(dropout)(top_model)
     output_layer = tf.keras.layers.Dense(n_classes, activation='softmax')(top_model)
 
     # Group the convolutional base and new fully-connected layers into a Model object.
@@ -43,7 +44,7 @@ def VGG16_model(learning_rate, n_classes,fine_tune,input_shape):
     return model
 
 
-def VGG16_model2(learning_rate, n_classes,fine_tune,input_shape):
+def VGG16_model2(dropout,earning_rate, n_classes,fine_tune,input_shape):
     vgg16_model = tf.keras.applications.vgg16.VGG16(weights="imagenet", include_top=False)
 
     # model = Sequential()
@@ -72,14 +73,16 @@ def VGG16_model2(learning_rate, n_classes,fine_tune,input_shape):
 
     vgg16_model.trainable = False
     input = Input(shape=input_shape)
-    vgg16 = vgg16_model(input)
-    model = tf.keras.layers.GlobalAveragePooling2D()(vgg16)
+    model = vgg16_model(input)
+    if dropout > -1:
+        model = tf.keras.layers.Dropout(dropout)(model)
+    model = tf.keras.layers.GlobalAveragePooling2D()(model)
     model = Dense(units=n_classes, activation='softmax') (model)
     model = Model(inputs=input, outputs=model)
 
     return model
 
-def conv_model2(learning_rate, n_classes,fine_tune=0):
+def conv_model2(dropout,learning_rate, n_classes,fine_tune=0):
 
     if fine_tune > 0:
         for layer in conv_base.layers[:-fine_tune]:
@@ -100,7 +103,7 @@ def conv_model2(learning_rate, n_classes,fine_tune=0):
     # model.summary()
     return model
 
-def mobile_net_model(learning_rate, n_classes,fine_tune,input_shape):
+def mobile_net_model(dropout,learning_rate, n_classes,fine_tune,input_shape):
     mobile_net = tf.keras.applications.MobileNetV2(weights="imagenet", include_top=False)
     mobile_net.trainable = False  # keeeping mobile net weights same
 
@@ -118,14 +121,16 @@ def mobile_net_model(learning_rate, n_classes,fine_tune,input_shape):
 
     #mobile_net.trainable = False
     input = Input(shape=input_shape)
-    mobile = mobile_net(input)
-    model = tf.keras.layers.GlobalAveragePooling2D()(mobile)
+    model = mobile_net(input)
+    if dropout > -1:
+        model = tf.keras.layers.Dropout(dropout)(model)
+    model = tf.keras.layers.GlobalAveragePooling2D()(model)
     model = Dense(units=n_classes, activation='softmax') (model)
     model = Model(inputs=input, outputs=model)
 
     return model
 
-def conv_model(learning_rate, n_classes,fine_tune=0):
+def conv_model(dropout,learning_rate, n_classes,fine_tune=0):
     model = Sequential()
 
     model.add(Conv2D(filters=32, kernel_size=(5, 5), activation="relu", padding="valid", input_shape=[224, 224, 3]))
@@ -193,7 +198,7 @@ class PatchEncoder(tf.keras.layers.Layer):
         encoded = self.projection(patch) + self.position_embedding(positions)
         return encoded
 
-def patches(learning_rate, n_classes,fine_tune=0):
+def patches(dropout,learning_rate, n_classes,fine_tune=0):
     inputs = tf.keras.layers.Input(shape=(224, 224, 3))
     patches = CreatePatches(patch_size=128)(inputs)
     capa = tf.keras.models.Model(inputs, patches)
@@ -211,7 +216,7 @@ def patches(learning_rate, n_classes,fine_tune=0):
     model.summary()
     return model
 
-def xception(learning_rate, n_classes,input_shape,fine_tune=0):
+def xception(dropout,learning_rate, n_classes,input_shape,fine_tune=0):
     xception_model = Xception(weights="imagenet", include_top=False)
     # model = Sequential()
     # for layer in xception_model.layers[:-1]:
@@ -234,8 +239,10 @@ def xception(learning_rate, n_classes,input_shape,fine_tune=0):
 
     xception_model.trainable = False
     input = Input(shape=input_shape)
-    xception = xception_model(input)
-    model = tf.keras.layers.GlobalAveragePooling2D()(xception)
+    model = xception_model(input)
+    if dropout > -1:
+        model = tf.keras.layers.Dropout(dropout)(model)
+    model = tf.keras.layers.GlobalAveragePooling2D()(model)
     model = Dense(units=n_classes, activation='softmax') (model)
     model = Model(inputs=input, outputs=model)
     # for layer in xception_model.layers:
