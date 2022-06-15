@@ -33,8 +33,10 @@ def build_model(learning_rate, n_classes,fine_tune,model_name,input_shape,image_
         model = tf.keras.models.Model(inputs=[img_model.input,clinic_model.input], outputs=x)
     elif image_model:
         model =  img_model
-    elif clinical_model:
+    elif clinical:
         model = clinic_model
+    else:
+        raise ValueError("No model selected")
     #optimizer = optimizers.Adam(clipvalue=0.5)
     model.compile(tf.keras.optimizers.Adam(learning_rate=learning_rate),
                   loss='categorical_crossentropy',
