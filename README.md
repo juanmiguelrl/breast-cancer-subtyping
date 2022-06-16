@@ -137,6 +137,14 @@ List of dictionaries containing each one:
 &emsp;output_val: Path where the second resulting dataframe will be stored  
 (being a list allows to for example make a first split into 60% for training and 40% for other dataframe that in the next element of the list can be splitted 50% to have a train dataframe with 20% of the original data and a test dataframe with another 20% of the original data)
 
+### Process Clinical data (--pc): 
+This option process the clinical data indicated of the dataframe given normalizing the numerical data and using one-hot encoding with the categorical data to prepare it for the use in the training of the model.  
+List of dictionaries containing each one:  
+&emsp;dataframe: Path to the dataframe to be processed.  
+&emsp;output_dataframe: Path where the resulting dataframe will be stored  
+&emsp;clinical_columns: Dictionary containing the following elements:  
+&emsp;&emsp;continuos: List with the numerical data of the dataframe.  
+&emsp;&emsp;categorical: List with the categorical data of the dataframe.  
 
 ### Train options in json (--t): (not finished yet) 
 Compulsory:  

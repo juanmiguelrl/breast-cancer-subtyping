@@ -47,9 +47,9 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
 ############################################
     #prepare data generators with clinical data
     if parameters["clinical_model"]:
-        train_dataframe = process_clinical_data(train_dataframe,parameters["clinical_columns"])[0].reset_index(drop=True)
-        valid_dataframe = process_clinical_data(valid_dataframe,parameters["clinical_columns"])[0].reset_index(drop=True)
-        test_dataframe = process_clinical_data(test_dataframe, parameters["clinical_columns"])[0].reset_index(drop=True)
+        # train_dataframe = process_clinical_data(train_dataframe,parameters["clinical_columns"])[0].reset_index(drop=True)
+        # valid_dataframe = process_clinical_data(valid_dataframe,parameters["clinical_columns"])[0].reset_index(drop=True)
+        # test_dataframe = process_clinical_data(test_dataframe, parameters["clinical_columns"])[0].reset_index(drop=True)
 
         clinical_train_target = pd.get_dummies(train_dataframe.copy()["target"], columns=["target"])
         clinical_valid_target = pd.get_dummies(valid_dataframe.copy()["target"], columns=["target"])
@@ -299,9 +299,9 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
         epochs=parameters["epochs"],
         callbacks=callbacks,
         class_weight=class_weight,
-        verbose=verbose,
-        use_multiprocessing=True,
-        workers=parameters["workers"]
+        verbose=verbose#,
+        #use_multiprocessing=True,
+        #workers=parameters["workers"]
         #,drop_remainder=True
     )
 

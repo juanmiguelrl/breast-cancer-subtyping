@@ -36,6 +36,8 @@ if __name__ == '__main__':
                         default=False, action="store_true")
     parser.add_argument("--c", help="clasifies the images and splits them in train and test sets ", required=False,
                         default=False, action="store_true")
+    parser.add_argument("--pc", help="process clinical dataframe)", required=False,
+                        default=False, action="store_true")
     parser.add_argument("--sd", help="splits a dataframe (for example into train and validation)", required=False,
                         default=False, action="store_true")
     parser.add_argument("--t", help="execute the training of the neural network", required=False, default=False, action="store_true")
@@ -107,6 +109,9 @@ if __name__ == '__main__':
     if args.mt:
         print("modifying target column...")
         util.modify_multiple_targets(PARAMS["modify_target"])
+    if args.pc:
+        print("Processing clinical dataframe...")
+        util.multiple_process_clinical_data(PARAMS["process_clinical_dataframe"])
     if args.sd:
         print("Splitting dataframe...")
         util.multiple_split_dataframe(PARAMS["split_dataframe"])

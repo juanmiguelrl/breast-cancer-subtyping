@@ -3,6 +3,8 @@ import json
 import pandas as pd
 import sklearn
 from collections import Counter
+from sklearn.preprocessing import MinMaxScaler
+import numpy as np
 
 def calculate_class_weights(train_generator):
     counter = Counter(train_generator.classes)
@@ -249,6 +251,37 @@ def modify_multiple_targets(list_of_dictionaries):
     for element in list_of_dictionaries:
         modify_target(element)
 
+################################################################################
+
+#process the data for the model which uses the clinical data
+def process_clinical_data(dataframe,parameters):
+    cs = MinMaxScaler()
+    data = dataframe.copy()
+    #data.set_index("filepath", inplace=True)
+    # data = data[parameters["continuos"] + parameters["categorical"] + ["target"]]
+    for column in data:
+        if column in parameters["continuos"]:
+            #data[column].replace(np.nan, 0.1)
+            #data[column] = data[column].apply(removenan)
+            data[column].fillna(0, inplace=True)
+        if column in parameters["categorical"]:
+            data[column].replace(np.nan, "unknown")
+    data = data[parameters["continuos"] + parameters["categorical"] + ["target","filepath"]]
+    data[parameters["continuos"]] = cs.fit_transform(data[parameters["continuos"]])
+    data = pd.get_dummies(data, columns=parameters["categorical"])
+
+    # target = dataframe.copy()
+    # #target.set_index("filepath", inplace=True)
+    # target = target["target"]
+    # target = pd.get_dummies(target, columns=["target"])
+
+    return data#,target
+
+def multiple_process_clinical_data(list_of_dictionaries):
+    for parameters in list_of_dictionaries:
+        process_clinical_data(pd.read_csv(parameters["dataframe"], sep='\t', header=0),parameters["clinical_columns"]).to_csv(parameters["output_dataframe"], sep='\t', index=False)
+    return
+
 def split_Dataframe(parameters):
     dataframe = pd.read_csv(parameters["dataframe"], sep='\t', header=0)
     train_dataframe, val_dataframe = sklearn.model_selection.train_test_split(dataframe, test_size=parameters['validation_split'],
@@ -261,3 +294,4 @@ def multiple_split_dataframe(list_of_dictionaries):
     for parameters in list_of_dictionaries:
         split_Dataframe(parameters)
     return
+
