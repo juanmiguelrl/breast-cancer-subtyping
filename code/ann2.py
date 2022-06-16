@@ -282,7 +282,7 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
     #################################
 
     if nni_activated:
-        verbose = 0
+        verbose = 1
         callbacks.append(log_nni_callback())
     else:
         verbose = 1
@@ -313,5 +313,5 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
     print("Test accuracy:", test_acc)
     nni.report_final_result(test_acc)
 
-    model.save(model_dir)
+    model.save(log_dir+"/final_model")
 

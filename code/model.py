@@ -1,4 +1,4 @@
-from image_model import VGG16_model,mobile_net_model,conv_model,patches,xception,VGG16_model2
+from image_model import VGG16_model,mobile_net_model,xception,VGG16_model2#,conv_model,patches
 from clinical_model import clinical_model
 import tensorflow as tf
 from tensorflow.keras.layers import Dense
@@ -11,10 +11,10 @@ def build_image_model(dropout,learning_rate, n_classes,fine_tune,model_name,inpu
         return VGG16_model2(dropout,learning_rate, n_classes,fine_tune,input_shape)
     elif model_name == "mobile_net":
         return mobile_net_model(dropout,learning_rate, n_classes,fine_tune,input_shape)
-    elif model_name == "conv":
-        return conv_model(dropout,learning_rate, n_classes,fine_tune)
-    elif model_name == "patches":
-        return patches(dropout,learning_rate, n_classes,fine_tune)
+    # elif model_name == "conv":
+    #     return conv_model(dropout,learning_rate, n_classes,fine_tune)
+    # elif model_name == "patches":
+    #     return patches(dropout,learning_rate, n_classes,fine_tune)
     elif model_name == "xception":
         return xception(dropout,learning_rate, n_classes,input_shape,fine_tune)
     else:
@@ -23,7 +23,7 @@ def build_image_model(dropout,learning_rate, n_classes,fine_tune,model_name,inpu
 
 def build_model(dropout,learning_rate, n_classes,fine_tune,model_name,input_shape,image_model=True,clinical=False,clinical_num=0):
     if image_model:
-        img_model = build_image_model(learning_rate, n_classes,fine_tune,model_name,input_shape,dropout)
+        img_model = build_image_model(dropout,learning_rate, n_classes,fine_tune,model_name,input_shape)
     if clinical:
         clinic_model = clinical_model(clinical_num,n_classes)
     if image_model and clinical:
