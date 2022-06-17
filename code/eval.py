@@ -49,6 +49,27 @@ class confusion_matrix_callback(keras.callbacks.Callback):
         with self.file_writer.as_default():
             tf.summary.image("Training Confusion Matrix", cm_imaget, step=epoch)
 
+class confusion_matrix_test_callback(keras.callbacks.Callback):
+    def __init__(self,file_writer,validation_generator):
+        self.file_writer = file_writer
+        self.validation_generator = validation_generator
+    def on_test_end(self, epoch, logs=None):
+        # Use the model to predict the values from the validation dataset.
+        test_pred_raw = self.model.predict(self.validation_generator)
+        #print(test_pred_raw)
+        test_pred = np.argmax(test_pred_raw, axis=1)
+        #class_labels = list(val_ds.class_indices.keys())
+
+        # Calculate the confusion matrix.
+        cm = sklearn.metrics.confusion_matrix(self.validation_generator.classes, test_pred)
+        # Log the confusion matrix as an image summary.
+        figure = plot_confusion_matrix(cm, self.validation_generator.class_indices.keys())
+        cm_image = plot_to_image(figure)
+
+        # Log the confusion matrix as an image summary.
+        with self.file_writer.as_default():
+            tf.summary.image("Test Confusion Matrix", cm_image, step=1)
+
 class log_learning_rate_callback(keras.callbacks.Callback):
     def __init__(self,file_writer):
         self.file_writer = file_writer

@@ -9,7 +9,7 @@ import math
 from tensorflow import keras
 
 import sklearn.metrics
-from eval import  plot_confusion_matrix,plot_to_image,confusion_matrix_callback,log_learning_rate_callback, log_nni_callback
+from eval import  plot_confusion_matrix,plot_to_image,confusion_matrix_callback,log_learning_rate_callback, log_nni_callback, confusion_matrix_test_callback
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from util import calculate_class_weights
 from tensorflow.python.client import device_lib
@@ -238,7 +238,12 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
         test_generator_definitive = test_generator
     #################################
     if parameters["class_weights"]:
-            class_weight = calculate_class_weights(train_generator_definitive)
+            if parameters["balance_data"]:
+                print("Not applying weights as data is already balanced")
+                class_weight = None
+            else:
+                print("applying weights")
+                class_weight = calculate_class_weights(train_generator_definitive)
     else:
         class_weight = None
     #################################
@@ -309,7 +314,12 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
     print(model.predict(train_generator_definitive[1][0]))
 
     #test_acc = test(args, model, device, test_loader)
-    _,test_acc = model.evaluate(test_generator_definitive)
+    if parameters["log_final"]:
+        file_writer = tf.summary.create_file_writer(log_dir + "/test")
+        callbacks2 = []
+        callbacks2.append(tf.keras.callbacks.TensorBoard(log_dir=log_dir + "/test", histogram_freq=1))
+        callbacks2.append(confusion_matrix_test_callback(file_writer, test_generator_definitive))
+    _,test_acc,_ = model.evaluate(test_generator_definitive,callbacks=callbacks2)
     print("Test accuracy:", test_acc)
     nni.report_final_result(test_acc)
 
