@@ -314,9 +314,9 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
     print(model.predict(train_generator_definitive[1][0]))
 
     #test_acc = test(args, model, device, test_loader)
+    callbacks2 = []
     if parameters["log_final"]:
         file_writer = tf.summary.create_file_writer(log_dir + "/test")
-        callbacks2 = []
         callbacks2.append(tf.keras.callbacks.TensorBoard(log_dir=log_dir + "/test", histogram_freq=1))
         callbacks2.append(confusion_matrix_test_callback(file_writer, test_generator_definitive))
     _,test_acc,_ = model.evaluate(test_generator_definitive,callbacks=callbacks2)
