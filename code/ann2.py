@@ -73,6 +73,10 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
         steps_per_epoch = len(train_datagen_clinical)
         validation_steps = len(valid_datagen_clinical)
     else:
+        parameters["clinical"]["depth"] = 0
+        parameters["clinical"]["width_multiplier"] = 0
+        parameters["clinical"]["activation_function"] = "relu"
+        n_classes = 0
         n_classes = 0
         clinical_input_num = 0
         train_dataframe = train_dataframe.reset_index(drop=True)
@@ -210,10 +214,14 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
 
         with strategy.scope():
             model = build_model(parameters["dropout"],parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"],input_shape,
+                                parameters["clinical"]["depth"],parameters["clinical"]["width_multiplier"],
+                                parameters["clinical"]["activation_function"],
                                 parameters["image_model"],parameters["clinical_model"],clinical_input_num)
             #model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"],parameters["target_size"])
     else:
         model = build_model(parameters["dropout"],parameters["learning_rate"], n_classes, parameters["fine_tune"], parameters["model_name"],input_shape,
+                            parameters["clinical"]["depth"], parameters["clinical"]["width_multiplier"],
+                            parameters["clinical"]["activation_function"],
                             parameters["image_model"], parameters["clinical_model"], clinical_input_num)
         #model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"],parameters["target_size"])
 

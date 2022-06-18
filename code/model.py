@@ -41,11 +41,11 @@ def build_image_model(dropout,learning_rate, n_classes,fine_tune,model_name,inpu
         #return VGG16_model2(learning_rate, n_classes,fine_tune,input_shape)
 
 
-def build_model(dropout,learning_rate, n_classes,fine_tune,model_name,input_shape,image_model=True,clinical=False,clinical_num=0):
+def build_model(dropout,learning_rate, n_classes,fine_tune,model_name,input_shape,depth,width,activation_function,image_model=True,clinical=False,clinical_num=0):
     if image_model:
         img_model = build_image_model(dropout,learning_rate, n_classes,fine_tune,model_name,input_shape)
     if clinical:
-        clinic_model = clinical_model(clinical_num,n_classes)
+        clinic_model = clinical_model(clinical_num,n_classes,depth,width,activation_function)
     if image_model and clinical:
         combinedInput = concatenate([img_model.output, clinic_model.output])
         x = Dense(n_classes, activation="relu")(combinedInput)

@@ -11,7 +11,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras import Input,Model
 from tensorflow.keras.layers import Dense
 
-def clinical_model(input_num,output_num):
+def clinical_model(input_num,output_num,depth,width,activation_function):
     #defines the model for predicting using the clinical data
     # model = Sequential()
     # tf.keras.layers.Input(shape=(input_num,))
@@ -20,8 +20,10 @@ def clinical_model(input_num,output_num):
 
     print(input_num)
     input = Input(shape=(input_num,))
-    model = Dense(input_num, activation="relu")(input)
-    model = Dense(output_num, activation="softmax") (model)
+    model = Dense(input_num * width, activation=activation_function)(input)
+    for i in range(1,depth):
+        model = Dense(input_num*width, activation=activation_function)(model)
+    model = Dense(output_num, activation="softmax")(model)
     model = Model(inputs=input, outputs=model)
 
     return model
