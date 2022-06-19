@@ -214,14 +214,14 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
 
         with strategy.scope():
             model = build_model(parameters["dropout"],parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"],input_shape,
-                                parameters["clinical"]["depth"],parameters["clinical"]["width_multiplier"],
-                                parameters["clinical"]["activation_function"],
+                                parameters["clinical_depth"],parameters["clinical_width_multiplier"],
+                                parameters["clinical_activation_function"],
                                 parameters["image_model"],parameters["clinical_model"],clinical_input_num)
             #model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"],parameters["target_size"])
     else:
         model = build_model(parameters["dropout"],parameters["learning_rate"], n_classes, parameters["fine_tune"], parameters["model_name"],input_shape,
-                            parameters["clinical"]["depth"], parameters["clinical"]["width_multiplier"],
-                            parameters["clinical"]["activation_function"],
+                            parameters["clinical_depth"], parameters["clinical_width_multiplier"],
+                            parameters["clinical_activation_function"],
                             parameters["image_model"], parameters["clinical_model"], clinical_input_num)
         #model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"],parameters["target_size"])
 
@@ -318,18 +318,18 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
         #,drop_remainder=True
     )
 
-    print(train_generator_definitive[1][0])
-    print(model.predict(train_generator_definitive[1][0]))
+    #print(train_generator_definitive[1][0])
+    #print(model.predict(train_generator_definitive[1][0]))
 
     #test_acc = test(args, model, device, test_loader)
     callbacks2 = []
     if parameters["log_final"]:
-        file_writer = tf.summary.create_file_writer(log_dir + "/test")
+        file_writer = tf.summary.create_file_writer(log_dir + "/" + parameters["model_name"] + "/test")
         callbacks2.append(tf.keras.callbacks.TensorBoard(log_dir=log_dir + "/test", histogram_freq=1))
         callbacks2.append(confusion_matrix_test_callback(file_writer, test_generator_definitive))
     _,test_acc,_ = model.evaluate(test_generator_definitive,callbacks=callbacks2)
     print("Test accuracy:", test_acc)
     nni.report_final_result(test_acc)
 
-    model.save(log_dir+"/final_model")
+    model.save(log_dir+ "/" + parameters["model_name"] +"/final_model")
 
