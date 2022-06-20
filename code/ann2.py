@@ -15,7 +15,7 @@ from util import calculate_class_weights
 from tensorflow.python.client import device_lib
 from sklearn.model_selection import train_test_split
 
-def train_ann( parameters,model_dir,log_dir,nni_activated):
+def train_ann( parameters,log_dir,nni_activated):
 
     print(tf.config.list_physical_devices())
     print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
@@ -73,9 +73,9 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
         steps_per_epoch = len(train_datagen_clinical)
         validation_steps = len(valid_datagen_clinical)
     else:
-        parameters["clinical"]["depth"] = 0
-        parameters["clinical"]["width_multiplier"] = 0
-        parameters["clinical"]["activation_function"] = "relu"
+        parameters["clinical_depth"] = 0
+        parameters["clinical_width_multiplier"] = 0
+        parameters["clinical_activation_function"] = "relu"
         n_classes = 0
         n_classes = 0
         clinical_input_num = 0
@@ -324,12 +324,12 @@ def train_ann( parameters,model_dir,log_dir,nni_activated):
     #test_acc = test(args, model, device, test_loader)
     callbacks2 = []
     if parameters["log_final"]:
-        file_writer = tf.summary.create_file_writer(log_dir + "/" + parameters["model_name"] + "/test")
-        callbacks2.append(tf.keras.callbacks.TensorBoard(log_dir=log_dir + "/" + parameters["model_name"] + "/test", histogram_freq=1))
+        file_writer = tf.summary.create_file_writer(log_dir + "/test")
+        callbacks2.append(tf.keras.callbacks.TensorBoard(log_dir=log_dir + "/test", histogram_freq=1))
         callbacks2.append(confusion_matrix_test_callback(file_writer, test_generator_definitive))
-    _,test_acc,_ = model.evaluate(test_generator_definitive,callbacks=callbacks2)
+    _,test_acc,f1score = model.evaluate(test_generator_definitive,callbacks=callbacks2)
     print("Test accuracy:", test_acc)
-    nni.report_final_result(test_acc)
+    nni.report_final_result({'default': test_acc, "f1_score": f1score, "tensorboard_log_directory":(log_dir + "/test")})
 
     model.save(log_dir+ "/" + parameters["model_name"] +"/final_model")
 
