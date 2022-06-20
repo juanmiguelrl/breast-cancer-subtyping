@@ -23,9 +23,10 @@ def train_ann( parameters,log_dir,nni_activated):
 
 ############################################
     #dataframe
-    train_dataframe = pd.read_csv(parameters['train_dataframe'],sep="\t")
-    valid_dataframe = pd.read_csv(parameters['val_dataframe'], sep="\t")
-    test_dataframe = pd.read_csv(parameters['test_dataframe'], sep="\t")
+    if parameters['dataframe']:
+        train_dataframe = pd.read_csv(parameters['train_dataframe'],sep="\t")
+        valid_dataframe = pd.read_csv(parameters['val_dataframe'], sep="\t")
+        test_dataframe = pd.read_csv(parameters['test_dataframe'], sep="\t")
     if parameters["balance_data"]:
         print("train before balance\n")
         print(train_dataframe["target"].value_counts())
@@ -170,21 +171,24 @@ def train_ann( parameters,log_dir,nni_activated):
                                                                 batch_size=parameters["batch_size"],
                                                                 class_mode='categorical',
                                                                 target_size=target_size,
-                                                                save_to_dir = parameters['save_to_dir_train'])
+                                                                #save_to_dir = parameters['save_to_dir_train']
+                                                                )
 
             validation_generator = validation_datagen.flow_from_directory(parameters["valDir"],
                                                                           batch_size=parameters["batch_size"],
                                                                           class_mode='categorical',
                                                                           target_size=target_size,
                                                                           shuffle=False,
-                                                                          save_to_dir=parameters['save_to_dir_validation'])
+                                                                          #save_to_dir=parameters['save_to_dir_validation']
+                                                                          )
 
             test_generator = test_datagen.flow_from_directory(parameters["testDir"],
                                                                           batch_size=parameters["batch_size"],
                                                                           class_mode='categorical',
                                                                           target_size=target_size,
                                                                           shuffle=False,
-                                                                          save_to_dir=parameters['save_to_dir_validation'])
+                                                                          #save_to_dir=parameters['save_to_dir_validation']
+                                                                          )
 
         steps_per_epoch = math.ceil(train_generator.n / parameters["batch_size"])
         validation_steps = math.ceil(validation_generator.n / parameters["batch_size"])
