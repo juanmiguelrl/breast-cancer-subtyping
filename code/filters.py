@@ -477,10 +477,11 @@ def mask_list(input_dir,destination_path,resize_size,only_tissue,canny,discard,c
         if canny:
           canny_result = filter_canny(filter_rgb_to_grayscale(np_img),canny_params["sigma"],canny_params["low_threshold"],canny_params["high_threshold"],output_type="bool")
           np_img = np_img * np.dstack([~canny_result, ~canny_result, ~canny_result])
+          check = True
         if only_tissue:
           result,check = mask(np_img,remove_blue,remove_red,remove_green,only_one,empty_threshold)
           np_img = result
-        else:
+        elif not canny:
             check = True
             np_img = np.asarray(Image.open(img))
         np_img = Image.fromarray(np_img)
