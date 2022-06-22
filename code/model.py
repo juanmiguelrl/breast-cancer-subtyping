@@ -48,8 +48,11 @@ def build_model(dropout,learning_rate, n_classes,fine_tune,model_name,input_shap
         clinic_model = clinical_model(clinical_num,n_classes,depth,width,activation_function)
     if image_model and clinical:
         combinedInput = concatenate([img_model.output, clinic_model.output])
+        x = Dense(n_classes * 64, activation="relu")(combinedInput)
+        x = Dense(n_classes * 64, activation="relu")(x)
         x = Dense(n_classes, activation="relu")(combinedInput)
         x = Dense(n_classes, activation="softmax")(x)
+
         model = tf.keras.models.Model(inputs=[img_model.input,clinic_model.input], outputs=x)
     elif image_model:
         model =  img_model
