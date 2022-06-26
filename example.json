@@ -1,0 +1,175 @@
+{
+    "manifest" : {
+        "projects": ["TCGA-BRCA"],
+         "name_restrictions": ["*TS*"],
+         "endpoint": "https://api.gdc.cancer.gov/files",
+         "output_file" : "/mnt/example/manifest.txt"
+    },
+    "clinical" : {
+        "output_file" : "/mnt/example/clinical.txt",
+        "manifest_path": "/mnt/example/manifest.txt",
+        "name_restrictions" : ["*TS*"],
+        "fields_dictionary" : {
+            "stage":"diagnoses.0.ajcc_pathologic_stage",
+            "t_stage":"diagnoses.0.ajcc_pathologic_t",
+            "icd_10_code":"diagnoses.0.icd_10_code",
+            "age": "diagnoses.0.age_at_diagnosis",
+            "pathologic_m": "diagnoses.0.ajcc_pathologic_m",
+            "pathologic_n": "diagnoses.0.ajcc_pathologic_n",
+            "staging_system_edition": "diagnoses.0.ajcc_staging_system_edition",
+            "classification_of_tumor": "diagnoses.0.classification_of_tumor",
+            "diagnosis" : "diagnoses.0.primary_diagnosis",
+            "morphology" : "diagnoses.0.morphology"
+                        },
+        "experimental_strategy" : ["Tissue Slide"],
+        "expand" : ["diagnoses","samples","files"],
+        "files_data_format" : ["svs"],
+        "projects": ["TCGA-BRCA"],
+        "endpoint": "https://api.gdc.cancer.gov/cases"
+    },
+    "r_donwload" :{
+        "executable" : true,
+        "r_path" : "/mnt/Path_to_R/Rscript.exe",
+        "r_script_path" : "/mnt/main_program_path/R/script.R",
+        "arguments" : ["/mnt/example/pam50.csv"]
+    },
+    "join_data" : [
+        {"df1_path": "/mnt/example/clinical.txt",
+            "df2_path":"/mnt/example/pam50.csv",
+            "sep1": "\t",
+            "sep2": ",",
+            "join_type": "left",
+            "left_on": "submitter_id",
+            "right_on": "patient",
+            "output_file": "/mnt/example/data.csv"
+        }
+    ],
+    "slides" : {
+        "executable_path_file": "/mnt/Path_to_GDC-client/gdc-client.exe",
+        "executable": false,
+        "command_for_gdc_client": "/mnt/Path_to_GDC-client/gdc-client",
+         "manifest_file" : "/mnt/example/manifest.txt",
+         "output_dir" : "/mnt/example/slides"
+    },
+    "downscale": {
+        "manifest_path" : "/mnt/example/manifest.txt",
+        "svsdirectory" : "/mnt/example/slides/https:/api.gdc.cancer.gov/data/",
+        "outputDirectory" : "/mnt/example/images/output_images/",
+        "scale" : 32,
+        "store_together" : false
+    },
+    "store": {
+        "destination_path" : "/mnt/lustre/scratch/nlsas/home/ulc/co/jrl/imagenes/output_images_together/",
+    "input_dir" : "/mnt/netapp2/Store_uni/home/ulc/co/jrl/imagenes/output_images/" 
+    },
+    "filter" : [ 
+        {
+            "input_dir" : "/mnt/example/images/output_images_together/",
+            "destination_path" : "/mnt/example/images/output_images",
+            "only_tissue":true,
+            "canny":true,
+            "discard":true,
+            "crop":true,
+            "resize":false,
+            "remove_blue_pen":true,
+            "remove_red_pen":true,
+            "remove_green_pen":true,
+            "only_one_tissue":true,
+            "empty_threshold":0.5,
+            "canny_params":{
+                "sigma":1.0,
+                "low_threshold":0,
+                "high_threshold":25
+            }
+        }
+    ],
+    "clasify" : [
+        {
+        "input" : "/mnt/example/data.csv",
+        "imgdir" : "/mnt/example/images/output_images_together/",
+        "classification" : "diagnosis",
+        "output_file" : "/mnt/example/classified_diagnosis.csv",
+        "simplify_stage" : true
+        }
+    
+],
+"modify_target" : [
+    {   "input" : "/mnt/example/classified_diagnosis.csv",
+    "output" : "/mnt/example/classified_diagnosis_duct_lobular.csv",
+    "drop" : [],
+    "new_group" : true,
+    "new_group_list" : {
+        "Infiltrating duct carcinoma, NOS": ["Infiltrating duct carcinoma, NOS"],
+        "Lobular carcinoma, NOS": ["Lobular carcinoma, NOS"]
+    },
+    "other_name" : "other_diagnosis",
+    "remove_other" : true
+    }
+],
+"process_clinical_dataframe":[
+    {
+        "clinical_columns" : {
+            "continuos" : ["age_at_initial_pathologic_diagnosis","age"],
+             "categorical" : [
+                "pathologic_m","pathologic_n","t_stage",
+                "stage_simplified","BRCA_Subtype_PAM50"]
+            },
+            "dataframe" : "/mnt/example/classified_diagnosis_duct_lobular.csv",
+            "output_dataframe" : "/mnt/example/classified_diagnosis_duct_lobular_processed.csv"
+        }
+],
+"split_dataframe" : [
+    {
+        "dataframe" : "/mnt/example/classified_diagnosis_duct_lobular_processed.csv",
+        "validation_split" : 0.4,
+        "target" : "target",
+        "output_train" : "/mnt/example/train_classified_diagnosis_duct_lobular_processed.csv",
+        "output_val" : "/mnt/example/validation_classified_diagnosis_duct_lobular_processed.csv"
+    },
+    {
+        "dataframe" : "/mnt/example/validation_classified_diagnosis_duct_lobular_processed.csv",
+        "validation_split" : 0.5,
+        "target" : "target",
+        "output_train" : "/mnt/example/validation_classified_diagnosis_duct_lobular_processed.csv",
+        "output_val" : "/mnt/example/test_classified_diagnosis_duct_lobular_processed.csv"
+    }
+],
+
+"ann" : {
+    "batch_size" : 8,
+    "epochs" : 100,
+    "n_gpus" : 1,
+    "learning_rate" : 0.001,
+    "data_augmentation" : false,
+    "fine_tune" : 0,
+    "model_name" : "mobile_net",
+    "class_weights" : true,
+    "preprocessing_function" : false,
+    "log" : false,
+    "callbacks" : {
+        "tensorboard" : false,
+        "checkpoint" : false,
+        "early_stopping" : true,
+        "reduce_lr" : true,
+        "log" : false,
+        "confusion_matrix" : false
+    },
+    "callbacks_data" : {
+        "early_stopping_patience" : 30,
+        "reduce_lr_factor" : 0.2,
+        "reduce_lr_patience" : 8,
+        "reduce_lr_min_lr" : 0
+    },
+    "train_dataframe" : "/mnt/example/train_classified_diagnosis_duct_lobular_processed.csv",
+    "val_dataframe" : "/mnt/example/validation_classified_diagnosis_duct_lobular_processed.csv",
+    "test_dataframe" : "/mnt/example/test_classified_diagnosis_duct_lobular_processed.csv",
+    "x_col" : "filepath",
+    "y_col" : "target",
+    "image_model" : true,
+    "dataframe" : true,
+    "clinical_model" : false,
+    "target_size" : [1792,1792],
+    "balance_data" : false
+},
+    "logdir" : "/mnt/netapp2/Store_uni/home/ulc/co/jrl/ai/definitive/testing/logs/stage/"
+}
