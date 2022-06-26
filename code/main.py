@@ -41,7 +41,6 @@ if __name__ == '__main__':
     parser.add_argument("--sd", help="splits a dataframe (for example into train and validation)", required=False,
                         default=False, action="store_true")
     parser.add_argument("--t", help="execute the training of the neural network", required=False, default=False, action="store_true")
-    parser.add_argument("--e", help="evaluate the model indicated with the dataset indicated", required=False, default=False, action="store_true")
     parser.add_argument("--j", help="json file with the variables", required=True)
     parser.add_argument("--l", help="to log during the training or not", required=False, default=False, action="store_true")
     parser.add_argument("--n","--nni", help="to use nni or not during the training", required=False, default=False, action="store_true")
@@ -115,15 +114,10 @@ if __name__ == '__main__':
     if args.sd:
         print("Splitting dataframe...")
         util.multiple_split_dataframe(PARAMS["split_dataframe"])
-    if args.t or args.e:
-        # Sets up a timestamped log directory.
-        time = datetime.now().strftime("%Y%m%d-%H%M%S")
-        log_dir = PARAMS["logdir"] + PARAMS["ann"]["model_name"] + "/" + time
     if args.t:
+        time = datetime.now().strftime("%Y%m%d-%H%M%S")
+        log_dir = PARAMS["ann"]["logdir"] + PARAMS["ann"]["model_name"] + "/" + time
         print("training network...")
         ann2.train_ann(PARAMS["ann"],log_dir,args.n)
         #ann3.train_ann(PARAMS["ann"]["trainDir"], PARAMS["ann"]["testDir"], PARAMS["logdir"], PARAMS["ann"]["batch_size"], PARAMS["ann"]["epochs"],
         #               PARAMS["n_gpus"], PARAMS["model_dir"],PARAMS["ann"]["learning_rate"],log_dir,args.l)
-    # if args.e:
-    #     print("evaluating network...")
-    #     eval.evaluate_ann(PARAMS["model_dir"],PARAMS["eval"]["testDir"],PARAMS["eval"]["batch_size"],log_dir)
