@@ -146,9 +146,50 @@ List of dictionaries containing each one:
 &emsp;&emsp;continuos: List with the numerical data of the dataframe.  
 &emsp;&emsp;categorical: List with the categorical data of the dataframe.  
 
-### Train options in json (--t): (not finished yet) 
+### Train options in json (--t):  
 Compulsory:  
-&emsp;balance_data : boolean, if true it balance the data taking randomly the same amount of samples of each clasify option
+&emsp;balance_data : boolean, if true it balance the data taking randomly the same amount of samples of each clasify option (only compatible with dataframe option)  
+&emsp;epochs: to indicate the number of epochs that will be done at the training  
+&emsp;batch_size: to indicate the batch size at the training  
+&emsp;n_gpus: to indicate how many gpus will be used during the training  
+&emsp;learning_rate: to indicate the learning rate to use  
+&emsp;data_augmentation: to indicate if use or not data augmentation.  
+&emsp;class_weights: to indicate if use or not class weights  
+&emsp;image_model: boolean to indicate wheter use or not the an image input model  
+&emsp;clinical_model: boolean to indicate wheter use or not the a clinical (numerical and categorical data) input model  
+&emsp;log: boolean which if is true activates the tensorflow callbacks  
+&emsp;Compulsory if log is set to true (inside a dictionary called "callbacks"):  
+&emsp;&emsp;tensorboard: to log accuracy and loss data in tensorboard  
+&emsp;&emsp;checkpoint: to store the highest validation accuracy model   
+&emsp;&emsp;reduce_lr: if true it activates the callback to reduce the learning rate with the specified patience if the learning validation accuracy does not increment   
+&emsp;&emsp;log: if true it logs the learning rate  
+&emsp;&emsp;confusion_matrix: if true it logs a confusion matrix on each epoch of the prediction of the model with the training and with the validation dataset  
+&emsp;&emsp;compulsory if early_stopping is set to true(inside a dictionary called "callbacks_data"):  
+&emsp;&emsp;&emsp;early_stopping_patience: integer which indicates the patience to activate the early stopping  
+&emsp;&emsp;compulsory if reduce_lr is set to true(inside a dictionary called "callbacks_data"):  
+&emsp;&emsp;&emsp;reduce_lr_factor: float which indicates by how many is reduced the learning rate when is reduced  
+&emsp;&emsp;&emsp;reduce_lr_patience: integer indicating the patience to reduce the learning rate  
+&emsp;&emsp;&emsp;reduce_lr_min_lr: float which indicates the minimum learning rate which can be reduced   
+
+&emsp;Compulsory if clinical_model is true of if image_model and dataframe are true:  
+&emsp;&emsp;traindataframe: path to the train dataframe  
+&emsp;&emsp;val_dataframe: path to the validation dataframe  
+&emsp;&emsp;test_dataframe: path to the test dataframe  
+
+&emsp;Compulsory if image_model is true and dataframe is false:  
+&emsp;&emsp;trainDir: path to the train directory  
+&emsp;&emsp;valDire: path to the validation directory  
+&emsp;&emsp;testDir: path to the test directory  
+
+&emsp;Compulsory if image_model is true:  
+&emsp;&emsp;model_name: an string with "mobile_net","VGG16" or "xception" to indicate which pretrained model use  
+&emsp;&emsp;fine_tune: integer to indicate if unfroze and how many layers from the pretrained model to train  
+&emsp;&emsp;preprocessing_function: to indicate wheter user of not the preprocessing function corresponding to the pretrained model used  
+&emsp;&emsp;target_size: in the format [n,n] to indicate to which size rescale the images passed to the model  
+&emsp;dataframe: to indicate whether use image data from a dataframe or use image data directly from a directory(using data directly from directories is not compatible with using clinical data at the same time)  
+&emsp;compulsory if dataframe is set to true:  
+&emsp;&emsp;xcol: string to indicate the name of the column of the dataframe containing the image path (if it was prepared with this program it should be "filepath")  
+&emsp;&emsp;ycol: string to indicate the name of the column of the dataframe containing the class of each sample (if it was prepared with this program if should be "target")  
 
 ## Program options:  
 --j : followed by the json file path with the program configuration (needed for the different options of the program to work correctly)  
@@ -160,14 +201,8 @@ Compulsory:
 &emsp;--d : to downscale the wsi files  
 &emsp;--s : to store the images together  
 &emsp;--f : filters the images applying the options indicated  
-&emsp;--c : clasifies the images and slits them in train and test sets  
-&emsp;--t : this option os to execute the training of the neural network  
-&emsp;--e : to evaluate the model indicated with the dataset indicated  
-(These next options are necessary for the training option):  
-&emsp;--epochs : to indicate the number of epochs that will be done at the training  
-&emsp;--batch _size: to indicate the batch size at the training  
-&emsp;--n_gpus: to indicate how many gpus will be used during the training  
+&emsp;--c : classifies the images and slits them in train and test sets  
+&emsp;--t : this option is to execute the training and evaluation of the neural network   
 (These next options are optional for the training option):  
-&emsp;--l : to log during the training or not  
 &emsp;--n or --nni : to use nni or not during the training
 
