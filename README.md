@@ -4,8 +4,8 @@ First, the data needs to be downloaded with the GDC client
 The GDC client module is activated in cesga with:  
 module load gcccore/6.4.0 gdc-client/1.3.0-python-2.7.15  
 
-After the download, all that has to be done is prepare a json file with the parameters needed at main.py
-(json file explanation uncompleted at the moment)  
+After the download, all that has to be done is prepare a json file with the parameters needed at main.py  
+an example of a configuration json file is provided in the file named example.json at the root of this project.  
 ## json
 
 ### Manifest download options in json (--m):  
