@@ -1,0 +1,94 @@
+{
+    "batch_size": {
+      "_type": "choice",
+      "_value": [
+        256,128
+      ]
+    },
+    "learning_rate": {
+      "_type": "choice",
+      "_value": [
+        0.01,0.001,0.0001
+      ]
+    },
+    "fine_tune": {
+      "_type": "choice",
+      "_value": [
+        0,1,2,4,8
+      ]
+    },
+    "class_weights": {
+        "_type": "choice",
+        "_value": [
+          false,true
+        ]
+      },
+      "preprocessing_function": {
+        "_type": "choice",
+        "_value": [
+            true,false
+        ]
+      },
+      "target_size": {
+        "_type": "choice",
+        "_value": [
+          [224,224],[448,448]
+        ]
+      },
+      "dropout": {
+        "_type": "choice",
+        "_value": [
+          -1,0.1,0.5,0.9
+        ]
+      },
+    "balance_data": {
+      "_type": "choice",
+      "_value": [
+        true,false
+      ]
+    },
+    "model_name": {
+      "_type": "choice",
+      "_value": [
+        "xception","mobile_net","VGG16"
+      ]
+    },
+      "clinical_depth": {
+        "_type": "choice",
+        "_value": [
+          1,2,3,4
+        ]
+      },
+      "clinical_width_multiplier": {
+        "_type": "choice",
+        "_value": [
+          2,4,16,32
+        ]
+      },
+      "clinical_activation_function": {
+        "_type": "choice",
+        "_value": [
+          "relu","elu","softsign"
+        ]
+      },
+      "log_final": {
+        "_type": "choice",
+        "_value": [
+          true
+        ]
+      },
+
+
+      "clinical_model": {
+        "_type": "choice",
+        "_value": [
+          true
+        ]
+      },
+      "image_model": {
+        "_type": "choice",
+        "_value": [
+          true
+        ]
+      }
+  }

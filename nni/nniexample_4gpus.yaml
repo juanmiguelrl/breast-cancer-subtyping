@@ -1,0 +1,22 @@
+authorName: j
+experimentName: testing_rnn
+trialConcurrency: 4
+maxExecDuration: 100h
+maxTrialNum: 5000
+trainingServicePlatform: local
+searchSpacePath: /mnt/example/nni/search_space.json
+useAnnotation: false
+tuner:
+  builtinTunerName: TPE
+  classArgs:
+    optimize_mode: maximize
+trial:
+  command: python "/mnt/example/main.py" --j "/mnt/example/test.json" --t --nni
+  codeDir: .
+  gpuNum: 1
+localConfig:
+  gpuIndices: [0,1,2,3]
+  maxTrialNumPerGpu: 1
+  useActiveGpu: true
+  trialConcurrency: 4
+logDir: /mnt/example/nni_log/

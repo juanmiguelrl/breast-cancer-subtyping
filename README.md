@@ -3,6 +3,10 @@
 
 After the download, all that has to be done is prepare a json file with the parameters needed at main.py  
 an example of a configuration json file is provided in the file named example.json at the root of this project.  
+Also, an example of the files needed for the use of the program with nni are provided at the directory "nni" in the root of this project. To execute the program using nni the command will be: 
+nnictl path_to_config_file.yaml
+    
+
 ## json
 List with the json element necessary for each option of the program:  
 ### Manifest download options in json (--m):  
@@ -215,5 +219,5 @@ Compulsory:
 &emsp;--c : classifies the images and slits them in train and test sets  
 &emsp;--t : this option is to execute the training and evaluation of the neural network   
 (These next options are optional for the training option):  
-&emsp;--n or --nni : to use nni or not during the training
+&emsp;--n or --nni : to use nni (it needs to have nni installed)
 
