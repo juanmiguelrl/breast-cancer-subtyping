@@ -1,33 +1,16 @@
-#mask to leave only the tissue pixels
-import glob 
-import shutil
-import skimage
-import scipy
 import numpy as np
 import skimage.morphology as sk_morphology
 import scipy.ndimage.morphology as sc_morph
-from PIL import Image
 import math
-import os
 import skimage.feature as sk_feature
 
 import glob
-import shutil
 import os
 from PIL import Image
 Image.MAX_IMAGE_PIXELS = 3000000000
-#to store all the reduced images in one folder (to revise them visually without going through a lot of folders)    
 
-
-#destination_path = "/mnt/netapp2/Store_uni/home/ulc/co/jrl/imagenes/mini_output_images_together/"
-#input_dir = "/mnt/netapp2/Store_uni/home/ulc/co/jrl/imagenes/mini_output_images/*/*"
-
-
-###############################################
 
 #from wsi filter
-
-
 def mask_percent(np_img):
   """
   Determine the percentage of a NumPy array that is masked (how many of the values are 0 values).
@@ -400,10 +383,6 @@ def is_empty_area(result,mask,threshold=0.5):
 
 
 def mask(img,remove_blue,remove_red,remove_green,only_one,empty_threshold):
-    #rgb = util.pil_to_np_rgb(img)
-    #grayscale = filter.filter_rgb_to_grayscale(rgb)
-
-    #green_mask = filter_green_channel(img)
     gray_mask = filter_grays(img)
     red_mask = filter_red(img, red_lower_thresh = 180, green_upper_thresh=80, blue_upper_thresh=90)
     green_mask = filter_green_pen(img)
@@ -463,9 +442,6 @@ def crop_resize_image(original_image,resize_size):
     # plt.show()
     # save image
     return resized_image
-    #resized_image.save(os.path.join(destination_path, img))
-    #for img in glob.glob(input_dir):
-        #shutil.copy(img, destination_path+"\\"+get_filename(img))
 ################################################
 
 def mask_list(input_dir,destination_path,resize_size,only_tissue,canny,discard,crop,resize,
@@ -489,16 +465,11 @@ def mask_list(input_dir,destination_path,resize_size,only_tissue,canny,discard,c
           np_img = np_img.crop(np_img.getbbox())
         if resize:
           np_img = np_img.resize(resize_size)
-        #np_img = crop_resize_image(np_img,resize_size)
         if np_img.mode == 'L':
           np_img = np_img.convert('RGB')
         if check or not discard:
-          #np_img.show()
-          #np_img.save(destination_path+remove_suffix(remove_prefix(img,input_dir.rsplit('\\', 1)[0]),".png")+".png")
           np_img.save(os.path.join(destination_path,os.path.basename(img)))
         else:
-          #np_img.show()
-          #np_img.save(destination_path+remove_suffix("/discarded/"+remove_prefix(img,input_dir.rsplit('\\', 1)[0]),".png")+".png")
           np_img.save( os.path.join(os.path.join(destination_path,"discarded"), os.path.basename(img)))
 
 def filter_images(input_dir,destination_path,resize_size=(896,896),only_tissue=True,canny=False,discard=True,crop=True,

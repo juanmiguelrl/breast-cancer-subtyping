@@ -78,8 +78,6 @@ if __name__ == '__main__':
         util.download_data_with_R(r_donwload["executable"],r_donwload["r_path"],r_donwload["r_script_path"],r_donwload["arguments"])
     if args.jd:
         #default values for the jd_donwload
-        #join_data = {}
-        #join_data.update(PARAMS["join_data"])
         util.join_data(PARAMS["join_data"])
     if args.dl:
         #default values for the slides
@@ -104,7 +102,6 @@ if __name__ == '__main__':
     if args.c:
         print("clasifying images...")
         clasify.clasify_multiple(PARAMS["clasify"])
-        #clasify.clasify_images_oldv2(PARAMS["clasify"]["input"], PARAMS["clasify"]["imgdir"], PARAMS["clasify"]["sourceDir"], PARAMS["clasify"]["newDirTOsplitImages"],PARAMS["classification"])
     if args.mt:
         print("modifying target column...")
         util.modify_multiple_targets(PARAMS["modify_target"])
@@ -119,5 +116,4 @@ if __name__ == '__main__':
         log_dir = PARAMS["ann"]["logdir"] + PARAMS["ann"]["model_name"] + "/" + time
         print("training network...")
         ann2.train_ann(PARAMS["ann"],log_dir,args.n)
-        #ann3.train_ann(PARAMS["ann"]["trainDir"], PARAMS["ann"]["testDir"], PARAMS["logdir"], PARAMS["ann"]["batch_size"], PARAMS["ann"]["epochs"],
-        #               PARAMS["n_gpus"], PARAMS["model_dir"],PARAMS["ann"]["learning_rate"],log_dir,args.l)
+

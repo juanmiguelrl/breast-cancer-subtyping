@@ -4,7 +4,9 @@ import pandas as pd
 import sklearn
 from collections import Counter
 from sklearn.preprocessing import MinMaxScaler
+import sklearn.model_selection
 import numpy as np
+import subprocess
 
 def calculate_class_weights(train_generator):
     counter = Counter(train_generator.classes)
@@ -176,13 +178,11 @@ def download_data(output_file, manifest_path, projects, name_restrictions, field
 def download_data_with_R(executable,r_path,r_script_path,arguments):
     """ Download data using R
     """
-    import subprocess
-    import os
     if executable:
         exec_name = r_path
     else:
         exec_name = "Rscript"
-    print([exec_name, r_script_path.replace("\\", "/")])
+    print([exec_name, r_script_path.replace("\\", "/")]+arguments)
     pipe = subprocess.run([exec_name, r_script_path.replace("\\", "/")]+arguments,shell=True)
     return
 

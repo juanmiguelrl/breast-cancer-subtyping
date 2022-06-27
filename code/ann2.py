@@ -1,19 +1,15 @@
 import pandas as pd
 
 from model import build_model
-from clinical_model import process_clinical_data,ClinicalDataGenerator,JoinedGen
-import numpy as np
+from clinical_model import ClinicalDataGenerator,JoinedGen
 import tensorflow as tf
 import nni
 import math
-from tensorflow import keras
 
-import sklearn.metrics
-from eval import  plot_confusion_matrix,plot_to_image,confusion_matrix_callback,log_learning_rate_callback, log_nni_callback, confusion_matrix_test_callback
+from eval import  confusion_matrix_callback,log_learning_rate_callback, log_nni_callback, confusion_matrix_test_callback
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from util import calculate_class_weights
 from tensorflow.python.client import device_lib
-from sklearn.model_selection import train_test_split
 
 def train_ann( parameters,log_dir,nni_activated):
 
@@ -48,9 +44,6 @@ def train_ann( parameters,log_dir,nni_activated):
 ############################################
     #prepare data generators with clinical data
     if parameters["clinical_model"]:
-        # train_dataframe = process_clinical_data(train_dataframe,parameters["clinical_columns"])[0].reset_index(drop=True)
-        # valid_dataframe = process_clinical_data(valid_dataframe,parameters["clinical_columns"])[0].reset_index(drop=True)
-        # test_dataframe = process_clinical_data(test_dataframe, parameters["clinical_columns"])[0].reset_index(drop=True)
 
         clinical_train_target = pd.get_dummies(train_dataframe.copy()["target"], columns=["target"])
         clinical_valid_target = pd.get_dummies(valid_dataframe.copy()["target"], columns=["target"])
@@ -66,18 +59,12 @@ def train_ann( parameters,log_dir,nni_activated):
         n_classes = clinical_train_target.shape[1]
         clinical_input_num = clinical_train_dataframe.shape[1]
 
-        # print("\n\n\n")
-        #
-        # print(clinical_train_dataframe)
-        #
-        # print("\n\n\n")
         steps_per_epoch = len(train_datagen_clinical)
         validation_steps = len(valid_datagen_clinical)
     else:
         parameters["clinical_depth"] = 0
         parameters["clinical_width_multiplier"] = 0
         parameters["clinical_activation_function"] = "relu"
-        n_classes = 0
         n_classes = 0
         clinical_input_num = 0
         train_dataframe = train_dataframe.reset_index(drop=True)
@@ -130,9 +117,6 @@ def train_ann( parameters,log_dir,nni_activated):
         test_datagen = ImageDataGenerator(preprocessing_function=preprocess_func,
                                                   rescale=1. / 255)
         if parameters['dataframe']:
-            # dataframe = pd.read_csv(parameters['dataframe_path'],sep="\t")
-            # train_dataframe, test_dataframe = train_test_split(dataframe, test_size=parameters['validation_split'], stratify=dataframe["target"])
-
             train_generator = train_datagen.flow_from_dataframe(
                 train_dataframe,
                 x_col=parameters['x_col'],
@@ -195,18 +179,9 @@ def train_ann( parameters,log_dir,nni_activated):
         n_classes = len(train_generator.class_indices)
     print("\n\n\n")
     print((input_shape))
-        # print(train_generator.filenames)
-        # print(train_generator.class_indices)
-        # print(train_generator.samples)
-        # print(train_generator.n)
-        # print(train_generator.__len__())
-        # print(len(train_generator))
-        # print("\n")
     #################################
     # for the use of multigpu
     #prepare the model
-    #parameters["image_model"] = False
-    #parameters["clinical_model"] = False
     if parameters["n_gpus"] > 1:
         device_type = 'GPU'
         devices = tf.config.experimental.list_physical_devices(
@@ -221,13 +196,11 @@ def train_ann( parameters,log_dir,nni_activated):
                                 parameters["clinical_depth"],parameters["clinical_width_multiplier"],
                                 parameters["clinical_activation_function"],
                                 parameters["image_model"],parameters["clinical_model"],clinical_input_num)
-            #model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"],parameters["target_size"])
     else:
         model = build_model(parameters["dropout"],parameters["learning_rate"], n_classes, parameters["fine_tune"], parameters["model_name"],input_shape,
                             parameters["clinical_depth"], parameters["clinical_width_multiplier"],
                             parameters["clinical_activation_function"],
                             parameters["image_model"], parameters["clinical_model"], clinical_input_num)
-        #model = build_model(parameters["learning_rate"],n_classes, parameters["fine_tune"], parameters["model_name"],parameters["target_size"])
 
 
 
@@ -287,13 +260,10 @@ def train_ann( parameters,log_dir,nni_activated):
 
         if parameters["callbacks"]["log"]:
             callbacks.append(log_learning_rate_callback(file_writer))
-            #lr_log = keras.callbacks.LambdaCallback(on_epoch_end=log_learning_rate)
-            #callbacks.append(lr_log)
+
         if parameters["callbacks"]["confusion_matrix"]:
             callbacks.append(confusion_matrix_callback(file_writer,validation_generator_definitive,train_generator_definitive))
-            #cm_callback = keras.callbacks.LambdaCallback(on_epoch_end=log_confusion_matrix(self=model))
 
-        #callbacks = [tensorboard_callback, cm_callback,reduce_lr,early_stopping,model_checkpoint_callback,lr_log]
     else:
         callbacks = []
     #################################
@@ -316,16 +286,9 @@ def train_ann( parameters,log_dir,nni_activated):
         epochs=parameters["epochs"],
         callbacks=callbacks,
         class_weight=class_weight,
-        verbose=verbose#,
-        #use_multiprocessing=True,
-        #workers=parameters["workers"]
-        #,drop_remainder=True
+        verbose=verbose
     )
 
-    #print(train_generator_definitive[1][0])
-    #print(model.predict(train_generator_definitive[1][0]))
-
-    #test_acc = test(args, model, device, test_loader)
     callbacks2 = []
     if parameters["log_final"]:
         file_writer = tf.summary.create_file_writer(log_dir + "/test")

@@ -169,7 +169,8 @@
     "dataframe" : true,
     "clinical_model" : false,
     "target_size" : [1792,1792],
-    "balance_data" : false
-},
+    "balance_data" : false,
     "logdir" : "/mnt/netapp2/Store_uni/home/ulc/co/jrl/ai/definitive/testing/logs/stage/"
+},
+    
 }
