@@ -11,13 +11,7 @@ Image.MAX_IMAGE_PIXELS = 3000000000
 
 
 def mask_percent(np_img):
-  """
-  Determine the percentage of a NumPy array that is masked (how many of the values are 0 values).
-  Args:
-    np_img: Image as a NumPy array.
-  Returns:
-    The percentage of the NumPy array that is masked.
-  """
+    #it determines and returns which percentage of the input image is masked by counting how many values are 0
   if (len(np_img.shape) == 3) and (np_img.shape[2] == 3):
     np_sum = np_img[:, :, 0] + np_img[:, :, 1] + np_img[:, :, 2]
     mask_percentage = 100 - np.count_nonzero(np_sum) / np_sum.size * 100
@@ -26,16 +20,9 @@ def mask_percent(np_img):
   return mask_percentage
 
 def filter_binary_dilation(np_img, disk_size=1, iterations=1, output_type="uint8"):
-  """
-  Dilate a binary object (bool, float, or uint8).
-  Args:
-    np_img: Binary image as a NumPy array.
-    disk_size: Radius of the disk structuring element used for dilation.
-    iterations: How many times to repeat the dilation.
-    output_type: Type of array to return (bool, float, or uint8).
-  Returns:
-    NumPy array (bool, float, or uint8) where edges have been dilated.
-  """
+    #if performs a dilation to the binary image passed
+    #the disk size indicate the radius of the disk kernel used in the dilation process
+    # iterations indicate how many times repeat the process
   if np_img.dtype == "uint8":
     np_img = np_img / 255
   result = sc_morph.binary_dilation(np_img, sk_morphology.disk(disk_size), iterations=iterations)
@@ -48,17 +35,10 @@ def filter_binary_dilation(np_img, disk_size=1, iterations=1, output_type="uint8
   return result
 
 def filter_binary_closing(np_img, disk_size=3, iterations=1, output_type="uint8"):
-  """
-  Close a binary object (bool, float, or uint8). Closing is a dilation followed by an erosion.
-  Closing can be used to remove small holes.
-  Args:
-    np_img: Binary image as a NumPy array.
-    disk_size: Radius of the disk structuring element used for closing.
-    iterations: How many times to repeat.
-    output_type: Type of array to return (bool, float, or uint8).
-  Returns:
-    NumPy array (bool, float, or uint8) following binary closing.
-  """
+    #it closes a binary image applying a dilation followed by an erosion
+    #it can be used in order to remove small holes in the image
+    #the disk size indicate the radius of the disk kernel used in the closing process
+    #iterations indicate how many times repeat the process
   if np_img.dtype == "uint8":
     np_img = np_img / 255
   result = sc_morph.binary_closing(np_img, sk_morphology.disk(disk_size), iterations=iterations)
@@ -71,19 +51,10 @@ def filter_binary_closing(np_img, disk_size=3, iterations=1, output_type="uint8"
   return result
 
 def filter_remove_small_objects(np_img, min_size=3000, avoid_overmask=True, overmask_thresh=95, output_type="uint8"):
-  """
-  Filter image to remove small objects (connected components) less than a particular minimum size. If avoid_overmask
-  is True, this function can recursively call itself with progressively smaller minimum size objects to remove to
-  reduce the amount of masking that this filter performs.
-  Args:
-    np_img: Image as a NumPy array of type bool.
-    min_size: Minimum size of small object to remove.
-    avoid_overmask: If True, avoid masking above the overmask_thresh percentage.
-    overmask_thresh: If avoid_overmask is True, avoid masking above this threshold percentage value.
-    output_type: Type of array to return (bool, float, or uint8).
-  Returns:
-    NumPy array (bool, float, or uint8).
-  """
+    #it removes the small objects from the image which are of less size than the indicated in min_size
+    #if avoid_overmask is true the function call itself recursively with smaller minimum size to remove reduce
+    #the masking performed by the filter
+    #if avoid_overmask is true it avoids masking above the thresh percentage indicated in overmask_thresh
 
   rem_sm = np_img.astype(bool)  # make sure mask is boolean
   rem_sm = sk_morphology.remove_small_objects(rem_sm, min_size=min_size)
@@ -105,14 +76,7 @@ def filter_remove_small_objects(np_img, min_size=3000, avoid_overmask=True, over
   return np_img
 
 def filter_binary_fill_holes(np_img, output_type="bool"):
-  """
-  Fill holes in a binary object (bool, float, or uint8).
-  Args:
-    np_img: Binary image as a NumPy array.
-    output_type: Type of array to return (bool, float, or uint8).
-  Returns:
-    NumPy array (bool, float, or uint8) where holes have been filled.
-  """
+    #it fill the holes in a binary image
   if np_img.dtype == "uint8":
     np_img = np_img / 255
   result = sc_morph.binary_fill_holes(np_img)
@@ -126,18 +90,10 @@ def filter_binary_fill_holes(np_img, output_type="bool"):
 
 
 def filter_green_channel(np_img, green_thresh=200, avoid_overmask=True, overmask_thresh=90, output_type="bool"):
-  """
-  Create a mask to filter out pixels with a green channel value greater than a particular threshold, since hematoxylin
-  and eosin are purplish and pinkish, which do not have much green to them.
-  Args:
-    np_img: RGB image as a NumPy array.
-    green_thresh: Green channel threshold value (0 to 255). If value is greater than green_thresh, mask out pixel.
-    avoid_overmask: If True, avoid masking above the overmask_thresh percentage.
-    overmask_thresh: If avoid_overmask is True, avoid masking above this threshold percentage value.
-    output_type: Type of array to return (bool, float, or uint8).
-  Returns:
-    NumPy array representing a mask where pixels above a particular green channel threshold have been masked out.
-  """
+    #it makes a mask to filter values over a green channel threshold, as hematoxylin and eosin are of
+    #purple and pink colors, and these colors do not have too much green
+    #avoid_overmask is a boolean that if is true it avoids masking above the overmask_thresh percentage indicated
+
   g = np_img[:, :, 1]
   gr_ch_mask = (g < green_thresh) & (g > 0)
   mask_percentage = mask_percent(gr_ch_mask)
@@ -160,15 +116,10 @@ def filter_green_channel(np_img, green_thresh=200, avoid_overmask=True, overmask
 
 
 def filter_grays(rgb, tolerance=15, output_type="bool"):
-  """
-  Create a mask to filter out pixels where the red, green, and blue channel values are similar.
-  Args:
-    np_img: RGB image as a NumPy array.
-    tolerance: Tolerance value to determine how similar the values must be in order to be filtered out
-    output_type: Type of array to return (bool, float, or uint8).
-  Returns:
-    NumPy array representing a mask where pixels with similar red, green, and blue values have been masked out.
-  """
+    # it creates a mask which filters the gray colors, which are the ones that
+    #have similar values of red, green and blue channels
+    #the tolerance determines how similiar the color values must be to be filtered
+
   (h, w, c) = rgb.shape
 
   rgb = rgb.astype(np.int)
@@ -187,19 +138,8 @@ def filter_grays(rgb, tolerance=15, output_type="bool"):
 
 
 def filter_red(rgb, red_lower_thresh, green_upper_thresh, blue_upper_thresh, output_type="bool"):
-  """
-  Create a mask to filter out reddish colors, where the mask is based on a pixel being above a
-  red channel threshold value, below a green channel threshold value, and below a blue channel threshold value.
-  Args:
-    rgb: RGB image as a NumPy array.
-    red_lower_thresh: Red channel lower threshold value.
-    green_upper_thresh: Green channel upper threshold value.
-    blue_upper_thresh: Blue channel upper threshold value.
-    output_type: Type of array to return (bool, float, or uint8).
-    display_np_info: If True, display NumPy array info and filter time.
-  Returns:
-    NumPy array representing the mask.
-  """
+    # it creates a mask which filters the red colors based on a pixel value below the blue and green channel
+    # threshold values and above the red channel threshold value
   r = rgb[:, :, 0] > red_lower_thresh
   g = rgb[:, :, 1] < green_upper_thresh
   b = rgb[:, :, 2] < blue_upper_thresh
@@ -213,19 +153,8 @@ def filter_red(rgb, red_lower_thresh, green_upper_thresh, blue_upper_thresh, out
   return result
 
 def filter_blue(rgb, red_upper_thresh, green_upper_thresh, blue_lower_thresh, output_type="bool"):
-  """
-  Create a mask to filter out blueish colors, where the mask is based on a pixel being below a
-  red channel threshold value, below a green channel threshold value, and above a blue channel threshold value.
-  Args:
-    rgb: RGB image as a NumPy array.
-    red_upper_thresh: Red channel upper threshold value.
-    green_upper_thresh: Green channel upper threshold value.
-    blue_lower_thresh: Blue channel lower threshold value.
-    output_type: Type of array to return (bool, float, or uint8).
-    display_np_info: If True, display NumPy array info and filter time.
-  Returns:
-    NumPy array representing the mask.
-  """
+    #it creates a mask which filters the blue colors based on a pixel value below the red and green channel
+    #threshold values and above the blue channel threshold value
   r = rgb[:, :, 0] < red_upper_thresh
   g = rgb[:, :, 1] < green_upper_thresh
   b = rgb[:, :, 2] > blue_lower_thresh
@@ -240,7 +169,9 @@ def filter_blue(rgb, red_upper_thresh, green_upper_thresh, blue_lower_thresh, ou
 
 
 def filter_green(rgb, red_upper_thresh, green_lower_thresh, blue_lower_thresh, output_type="bool"):
-
+    # it creates a mask which filters the green colors based on a pixel value above the green and blue channel
+    # threshold values and below the red channel threshold value
+    #as the blue and green channel tend to track together, a blue channel lower threshold instead of an upper is used
   r = rgb[:, :, 0] < red_upper_thresh
   g = rgb[:, :, 1] > green_lower_thresh
   b = rgb[:, :, 2] > blue_lower_thresh
@@ -255,14 +186,7 @@ def filter_green(rgb, red_upper_thresh, green_lower_thresh, blue_lower_thresh, o
   return result
 
 def filter_red_pen(rgb, output_type="bool"):
-  """
-  Create a mask to filter out red pen marks from a slide.
-  Args:
-    rgb: RGB image as a NumPy array.
-    output_type: Type of array to return (bool, float, or uint8).
-  Returns:
-    NumPy array representing the mask.
-  """
+    #it returns a mask filtering the red pen in the slides
   result = filter_red(rgb, red_lower_thresh=150, green_upper_thresh=80, blue_upper_thresh=90) & \
            filter_red(rgb, red_lower_thresh=110, green_upper_thresh=20, blue_upper_thresh=30) & \
            filter_red(rgb, red_lower_thresh=185, green_upper_thresh=65, blue_upper_thresh=105) & \
@@ -281,7 +205,7 @@ def filter_red_pen(rgb, output_type="bool"):
   return result
 
 def filter_green_pen(rgb, output_type="bool"):
-
+    # it returns a mask filtering the green pen in the slides
   result = filter_green(rgb, red_upper_thresh=150, green_lower_thresh=160, blue_lower_thresh=140) & \
            filter_green(rgb, red_upper_thresh=70, green_lower_thresh=110, blue_lower_thresh=110) & \
            filter_green(rgb, red_upper_thresh=45, green_lower_thresh=115, blue_lower_thresh=100) & \
@@ -307,23 +231,8 @@ def filter_green_pen(rgb, output_type="bool"):
   return result
 
 
-def filter_blue(rgb, red_upper_thresh, green_upper_thresh, blue_lower_thresh, output_type="bool"):
-
-  r = rgb[:, :, 0] < red_upper_thresh
-  g = rgb[:, :, 1] < green_upper_thresh
-  b = rgb[:, :, 2] > blue_lower_thresh
-  result = ~(r & g & b)
-  if output_type == "bool":
-    pass
-  elif output_type == "float":
-    result = result.astype(float)
-  else:
-    result = result.astype("uint8") * 255
-
-  return result
-
 def filter_blue_pen(rgb, output_type="bool"):
-
+    # it returns a mask filtering the blue pen in the slides
   result = filter_blue(rgb, red_upper_thresh=60, green_upper_thresh=120, blue_lower_thresh=190) & \
            filter_blue(rgb, red_upper_thresh=120, green_upper_thresh=170, blue_lower_thresh=200) & \
            filter_blue(rgb, red_upper_thresh=175, green_upper_thresh=210, blue_lower_thresh=230) & \
@@ -346,33 +255,18 @@ def filter_blue_pen(rgb, output_type="bool"):
   return result
 
 def filter_rgb_to_grayscale(np_img, output_type="uint8"):
-  """
-  Convert an RGB NumPy array to a grayscale NumPy array.
-  Shape (h, w, c) to (h, w).
-  Args:
-    np_img: RGB Image as a NumPy array.
-    output_type: Type of array to return (float or uint8)
-  Returns:
-    Grayscale image as NumPy array with shape (h, w).
-  """
-  # Another common RGB ratio possibility: [0.299, 0.587, 0.114]
+    #to pass the image from rgb to grayscale
   grayscale = np.dot(np_img[..., :3], [0.2125, 0.7154, 0.0721])
+
   if output_type != "float":
     grayscale = grayscale.astype("uint8")
+
   return grayscale
 
 def filter_canny(np_img, sigma=1, low_threshold=0, high_threshold=25, output_type="uint8"):
-  """
-  Filter image based on Canny algorithm edges.
-  Args:
-    np_img: Image as a NumPy array.
-    sigma: Width (std dev) of Gaussian.
-    low_threshold: Low hysteresis threshold value.
-    high_threshold: High hysteresis threshold value.
-    output_type: Type of array to return (bool, float, or uint8).
-  Returns:
-    NumPy array (bool, float, or uint8) representing Canny edge map (binary image).
-  """
+  #sigma is the width (std dev) of Gaussian
+  #low_threshold is the Low hysteresis threshold value
+  #high_threshold is the High hysteresis threshold value
   can = sk_feature.canny(np_img, sigma=sigma, low_threshold=low_threshold, high_threshold=high_threshold)
   if output_type == "bool":
     pass
@@ -385,6 +279,7 @@ def filter_canny(np_img, sigma=1, low_threshold=0, high_threshold=25, output_typ
 ###############################################
 from skimage.measure import label
 def getLargestCC(segmentation):
+    #used to get the largest connected component from the image
   labels = label(segmentation)
   assert (labels.max() != 0)  # assume at least 1 CC
   largestCC = labels == np.argmax(np.bincount(labels.flat)[1:]) + 1
@@ -407,6 +302,7 @@ def is_empty_area(result,mask,threshold=0.5):
 
 
 def mask(img,remove_blue,remove_red,remove_green,only_one,empty_threshold,tissue_closing,remove_small_size,fill_holes):
+    #it applies the different masks indicated by the used to the image
     gray_mask = filter_grays(img)
     #red_mask = filter_red(img, red_lower_thresh = 180, green_upper_thresh=80, blue_upper_thresh=90)
     red_mask = filter_red_pen(img)
