@@ -10,7 +10,6 @@ from PIL import Image
 Image.MAX_IMAGE_PIXELS = 3000000000
 
 
-#from wsi filter
 def mask_percent(np_img):
   """
   Determine the percentage of a NumPy array that is masked (how many of the values are 0 values).
@@ -213,7 +212,6 @@ def filter_red(rgb, red_lower_thresh, green_upper_thresh, blue_upper_thresh, out
     result = result.astype("uint8") * 255
   return result
 
-
 def filter_blue(rgb, red_upper_thresh, green_upper_thresh, blue_lower_thresh, output_type="bool"):
   """
   Create a mask to filter out blueish colors, where the mask is based on a pixel being below a
@@ -254,6 +252,32 @@ def filter_green(rgb, red_upper_thresh, green_lower_thresh, blue_lower_thresh, o
   else:
     result = result.astype("uint8") * 255
 
+  return result
+
+def filter_red_pen(rgb, output_type="bool"):
+  """
+  Create a mask to filter out red pen marks from a slide.
+  Args:
+    rgb: RGB image as a NumPy array.
+    output_type: Type of array to return (bool, float, or uint8).
+  Returns:
+    NumPy array representing the mask.
+  """
+  result = filter_red(rgb, red_lower_thresh=150, green_upper_thresh=80, blue_upper_thresh=90) & \
+           filter_red(rgb, red_lower_thresh=110, green_upper_thresh=20, blue_upper_thresh=30) & \
+           filter_red(rgb, red_lower_thresh=185, green_upper_thresh=65, blue_upper_thresh=105) & \
+           filter_red(rgb, red_lower_thresh=195, green_upper_thresh=85, blue_upper_thresh=125) & \
+           filter_red(rgb, red_lower_thresh=220, green_upper_thresh=115, blue_upper_thresh=145) & \
+           filter_red(rgb, red_lower_thresh=125, green_upper_thresh=40, blue_upper_thresh=70) & \
+           filter_red(rgb, red_lower_thresh=200, green_upper_thresh=120, blue_upper_thresh=150) & \
+           filter_red(rgb, red_lower_thresh=100, green_upper_thresh=50, blue_upper_thresh=65) & \
+           filter_red(rgb, red_lower_thresh=85, green_upper_thresh=25, blue_upper_thresh=45)
+  if output_type == "bool":
+    pass
+  elif output_type == "float":
+    result = result.astype(float)
+  else:
+    result = result.astype("uint8") * 255
   return result
 
 def filter_green_pen(rgb, output_type="bool"):
@@ -382,18 +406,20 @@ def is_empty_area(result,mask,threshold=0.5):
 
 
 
-def mask(img,remove_blue,remove_red,remove_green,only_one,empty_threshold):
+def mask(img,remove_blue,remove_red,remove_green,only_one,empty_threshold,tissue_closing,remove_small_size,fill_holes):
     gray_mask = filter_grays(img)
-    red_mask = filter_red(img, red_lower_thresh = 180, green_upper_thresh=80, blue_upper_thresh=90)
+    #red_mask = filter_red(img, red_lower_thresh = 180, green_upper_thresh=80, blue_upper_thresh=90)
+    red_mask = filter_red_pen(img)
     green_mask = filter_green_pen(img)
     blue_mask = filter_blue_pen(img)
     color_mask = green_mask & gray_mask & red_mask & blue_mask
 
     #mask = img.copy()
-    mask = filter_binary_dilation(color_mask)
-    mask = filter_binary_closing(mask, disk_size=10)
-    mask = filter_remove_small_objects(mask, min_size=100000)
-    mask = filter_binary_fill_holes(mask)
+    mask = filter_binary_dilation(color_mask,output_type="bool")
+    mask = filter_binary_closing(mask, tissue_closing,output_type="bool")
+    mask = filter_remove_small_objects(mask, remove_small_size,output_type="bool")
+    if fill_holes:
+        mask = filter_binary_fill_holes(mask)
 
 
     #result = img * np.dstack([mask, mask, mask])
@@ -444,7 +470,7 @@ def crop_resize_image(original_image,resize_size):
     return resized_image
 ################################################
 
-def mask_list(input_dir,destination_path,resize_size,only_tissue,canny,discard,crop,resize,
+def mask_list(input_dir,destination_path,resize_size,only_tissue,tissue_closing,remove_small_size,fill_holes,canny,discard,crop,resize,
               remove_blue,remove_red,remove_green,only_one,empty_threshold,canny_params):
     for img in glob.glob(os.path.join(input_dir,"*")):
       #check if is an file
@@ -455,7 +481,7 @@ def mask_list(input_dir,destination_path,resize_size,only_tissue,canny,discard,c
           np_img = np_img * np.dstack([~canny_result, ~canny_result, ~canny_result])
           check = True
         if only_tissue:
-          result,check = mask(np_img,remove_blue,remove_red,remove_green,only_one,empty_threshold)
+          result,check = mask(np_img,remove_blue,remove_red,remove_green,only_one,empty_threshold,tissue_closing,remove_small_size,fill_holes)
           np_img = result
         elif not canny:
             check = True
@@ -472,7 +498,7 @@ def mask_list(input_dir,destination_path,resize_size,only_tissue,canny,discard,c
         else:
           np_img.save( os.path.join(os.path.join(destination_path,"discarded"), os.path.basename(img)))
 
-def filter_images(input_dir,destination_path,resize_size=(896,896),only_tissue=True,canny=False,discard=True,crop=True,
+def filter_images(input_dir,destination_path,resize_size=(896,896),only_tissue=True,tissue_closing=10,remove_small_size=100000,fill_holes=True,canny=False,discard=True,crop=True,
                   resize=True,remove_blue=False,remove_red=False,remove_green=False,only_one=True,empty_threshold=0.5,
                   canny_params={}):
   if not os.path.exists(remove_prefix(destination_path,"/")):
@@ -481,16 +507,18 @@ def filter_images(input_dir,destination_path,resize_size=(896,896),only_tissue=T
   if not os.path.exists(destination_path+"/discarded"):
       os.makedirs(destination_path+"/discarded")
 
-  mask_list(input_dir,destination_path,resize_size,only_tissue,canny,discard,crop,resize,remove_blue,remove_red,remove_green,
+  mask_list(input_dir,destination_path,resize_size,only_tissue,tissue_closing,remove_small_size,fill_holes,canny,discard,crop,resize,remove_blue,remove_red,remove_green,
             only_one,empty_threshold,canny_params)
 
 def filter_images_multiple(list_of_dictionaries):
     for PARAMS in list_of_dictionaries:
-        filter = {"resize_size": (896,896) ,"only_tissue":True,"canny":False,"discard":True,"crop":True,
+        filter = {"resize_size": (896,896) ,"only_tissue":True,"tissue_closing":10, "remove_small_size":100000,"fill_holes":True,
+                  "canny":False,"discard":True,"crop":True,
                   "resize":True,"remove_blue_pen":False,"remove_red_pen":False,"remove_green_pen":False,"only_one_tissue":True,"empty_threshold":0.5,
                   "canny_params":{"sigma":1.0,"low_threshold":0,"high_threshold":25}}
         filter.update(PARAMS)
         filter_images(filter["input_dir"], filter["destination_path"], filter["resize_size"],
-                              filter["only_tissue"],filter["canny"],filter["discard"],filter["crop"],
+                              filter["only_tissue"],filter["tissue_closing"], filter["remove_small_size"],filter["fill_holes"]
+                                ,filter["canny"],filter["discard"],filter["crop"],
                               filter["resize"],filter["remove_blue_pen"],filter["remove_red_pen"],filter["remove_green_pen"],
                               filter["only_one_tissue"],filter["empty_threshold"],filter["canny_params"])
