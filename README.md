@@ -4,8 +4,8 @@
 After the download, all that has to be done is prepare a json file with the parameters needed at main.py  
 an example of a configuration json file is provided in the file named example.json at the root of this project.  
 Also, an example of the files needed for the use of the program with nni are provided at the directory "nni" in the root of this project. To execute the program using nni the command will be: 
-nnictl path_to_config_file.yaml
-    
+nnictl path_to_config_file.yaml  
+(Apart from the libraries from requirements also the gdc-downloader software is required to download files from the GDC and R software is required to use the functionality "R data download")  
 
 ## json
 List with the json element necessary for each option of the program:  
