@@ -1,10 +1,9 @@
 # breast-cancer-subtyping
 
 
-After the download, all that has to be done is prepare a json file with the parameters needed at main.py  
-an example of a configuration json file is provided in the file named example.json at the root of this project.  
-Also, an example of the files needed for the use of the program with nni are provided at the directory "nni" in the root of this project. To execute the program using nni the command will be: 
-nnictl path_to_config_file.yaml  
+After the download, all that has to be done is prepare a json file with the parameters needed at main.py.  
+An example of a configuration json file is provided in the file named example.json at the root of this project.  
+Also, an example of the files needed for the use of the program with nni are provided at the directory "nni" in the root of this project.
 (Apart from the libraries from requirements also the gdc-downloader software is required to download files from the GDC and R software is required to use the functionality "R data download")  
 
 
@@ -34,7 +33,9 @@ nnictl create --config "nniexample.yaml"
 ## json configuration file
 Here the program functionalities are explained along with its options to configure in the json file
 List with the json element necessary for each option of the program:  
+
 ### Manifest download options in json (--m):  
+This option allows to download a manifest file which lists the files to download from the GDC.  
 dictionary called "manifest":  
 Compulsory:  
 output_file : the path where the manifest will be stored  
@@ -46,6 +47,7 @@ experimental_strategy : the experimental strategy of the files
 endpoint : the endpoint where the query request will be sent, it should not be necessary to modify it (as default it has https://api.gdc.cancer.gov/files)  
 
 ### GDC data download options in json (--cl):  
+This option allows to download the clinical data from the cases related with the files from the manifest file passed.  
 dictionary called "clinical":  
 Compulsory:  
 output_file : the path where the output will be stored  
@@ -63,6 +65,7 @@ endpoint : the endpoint where the query request will be sent, it should not be n
 Info about the GDC API at: https://docs.gdc.cancer.gov/API/Users_Guide/Getting_Started/ and notebook with GDC API examples at https://github.com/NCI-GDC/gdc-docs/blob/develop/Notebooks/API_April_2021/Webinar_April_2021.ipynb
 
 ### R data download options in json (--dr) (Requires R to be installed):  
+This option allows to execute through R a R script, which can be useful to download as in the script provided more clinical data for the cases or even other function to be executed with the R script provided by the user.  
 dictionary called "r_donwload":  
 (The script script.R in the R folder can be used to download the PAM50 data for the BRCA data, this option can be used also to run other R scripts provided by the user)  
 Compulsory:  
@@ -73,6 +76,7 @@ Optional:
 &emsp;arguments : arguments to pass to the R script  
 
 ### join dataframes options in json (--jd):  
+It joins the two dataframes indicated into one dataframe.
 dictionary called "join_data":  
 Compulsory:  
 join_data : List of dictionaries containing each one the two dataframes that want to be joined, these dictionaries contain :  
@@ -85,7 +89,8 @@ join_data : List of dictionaries containing each one the two dataframes that wan
 &emsp; right_on : The column name which will be used to join on in the second dataframe 
 &emsp; output_file : The path for storing the resulting dataframe
 
-### Slides download options in json (--dl) (it requires the gdc-downloader program):  
+### Slides download options in json (--dl) (it requires the gdc-downloader software):  
+This option uses the manifest file previously generated to download the files indicated in it through the gdc-downloader software.
 dictionary called "slides":  
 Compulsory:  
 &emsp;manifest_file : The path to the manifest file  
@@ -96,6 +101,7 @@ Optional:
 &emsp;command_for_gdc_client : The command for the gdc-client in case it can be called directly
 
 ### Slides downscale options in json (--d) (it requires openslide):  
+This option allows to downscale WSI files into images wich weight less.  
 dictionary called "downscale":  
 Compulsory:  
 &emsp;svsdirectory : The path to the directory with the slides to downscale   
@@ -107,6 +113,7 @@ Optional:
 &emsp;manifest_path : The path to the manifest file, if it is not manifest path, all the files with the extension ".svs" in svsdirectory will be downscaled.
 
 ### Preprocess filter options in json (--f):  
+This option allows to apply different filters and preprocessing options to the images from the directory indicated.  
 dictionary called "filter":  
 List of dictionaries containing each one:  
 Compulsory:  
@@ -127,16 +134,16 @@ Optional:
 &emsp;only_one_tissue : bool to indicate if leave only the biggest tissue connected component or leave all  
 
 ### Clasify images from directory folders to dataframe (--cf):  
+This option stores in a new dataframe the images paths with a "target" column with the classification which the folders containing them have as name.  
 dictionary called "clasify":  
-(This option stores in a new dataframe the images paths with a "target" column with the classification which the folders containing them have as name)  
 List of dictionaries containing each one:  
 &emsp;imgdir: Path to the directory which contains the folders of each class of images  
 &emsp;extension: The extension of the images (to don`t get other type of files into the dataframe)  
 &emsp;output_file: Path where the resulting dataframe will be stored  
 
 ### Clasify options in json (--c):  
+This option stores in a new dataframe the images paths with a "target" column with the classification to be used.  
 dictionary called "clasify":  
-(This option stores in a new dataframe the images paths with a "target" column with the classification to be used)  
 List of dictionaries containing each one:  
 Compulsory:  
 &emsp;input: Path to the dataframe with the data to use in the classification  
@@ -147,8 +154,8 @@ Optional:
 &emsp;simplify_stage: Boolean if true it will create a new column in the output dataset with the column stage simplified (to 1,2,3,4)  
 
 ### Modify target columns options (--mt)  
-dictionary called "modify_target":  
 This option modifies the target columns from the dataframe indicated.  
+dictionary called "modify_target":  
 It is a list of dictionaries containing each one:  
 Compulsory:  
 &emsp;input : Path to the dataframe to modify   
@@ -162,8 +169,8 @@ Compulsory:
 &emsp; remove_other : Boolean, if true it will remove all the rows with the value specified in other_name in the target column (this is executed after new_group)  
 
 ### Split dataframe (--sd):  
+.This option splits the dataframes provided into 2 dataframes with the same ratio of each class than the original.  
 dictionary called "split_dataframe":  
-(This option splits the dataframes provided into 2 dataframes with the same ratio of each class than the original)  
 List of dictionaries containing each one:  
 &emsp;dataframe: Path to the dataframe to be splitted.  
 &emsp;validation_split: Number between 0 and 1 which indicates which percentage of the dataframe goes to each new dataframe (0.4 for example will result in the first dataframe having 60% of the data and the second one having a 40%)   
@@ -173,8 +180,8 @@ List of dictionaries containing each one:
 (being a list allows to for example make a first split into 60% for training and 40% for other dataframe that in the next element of the list can be splitted 50% to have a train dataframe with 20% of the original data and a test dataframe with another 20% of the original data)
 
 ### Process Clinical data (--pc):  
-dictionary called "process_clinical_dataframe":  
 This option process the clinical data indicated of the dataframe given normalizing the numerical data and using one-hot encoding with the categorical data to prepare it for the use in the training of the model.  
+dictionary called "process_clinical_dataframe":   
 List of dictionaries containing each one:  
 &emsp;dataframe: Path to the dataframe to be processed.  
 &emsp;output_dataframe: Path where the resulting dataframe will be stored  
@@ -183,6 +190,7 @@ List of dictionaries containing each one:
 &emsp;&emsp;categorical: List with the categorical data of the dataframe.  
 
 ### Train options in json (--t):  
+This option execute the training of the classification model and the the testing and generates different logging metrics and confusion matrices if the corresponding options are activated by the user.  
 dictionary called "ann":  
 Compulsory:  
 &emsp;balance_data : boolean, if true it balance the data taking randomly the same amount of samples of each clasify option (only compatible with dataframe option)  
