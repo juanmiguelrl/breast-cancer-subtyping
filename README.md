@@ -7,7 +7,32 @@ Also, an example of the files needed for the use of the program with nni are pro
 nnictl path_to_config_file.yaml  
 (Apart from the libraries from requirements also the gdc-downloader software is required to download files from the GDC and R software is required to use the functionality "R data download")  
 
-## json
+
+## Program options:  
+--j : followed by the json file path with the program configuration (needed for the different options of the program to work correctly)  
+(Options described in order, all of them need to be executed at least once in order to be able to use the next one)  
+&emsp;--m : download manifest from GDC  
+&emsp;--cl : download additional data from GDC  
+&emsp;--dr : run a R script to download data or any other R script wanted by the user  
+&emsp;--dl : download slides from a manifest file using the gdc-client program  
+&emsp;--d : to downscale the wsi files  
+&emsp;--jd: it joins the dataframes indicated  
+&emsp;--s : to store the images together  
+&emsp;--f : filters the images applying the options indicated  
+&emsp;--c : classifies the images and slits them in train and test sets  
+&emsp;--t : this option is to execute the training and evaluation of the neural network   
+(These next options are optional for the training option):  
+&emsp;--n or --nni : to use nni (it needs to have nni be called from an nni configuration file)  
+  
+
+example of execution:  
+main.py -j "config.json" --t  
+example of nni execution (for more information go to Neural Network Intelligence library documentation):  
+nnictl create --config "nniexample.yaml"
+
+
+## json configuration file
+Here the program functionalities are explained along with its options to configure in the json file
 List with the json element necessary for each option of the program:  
 ### Manifest download options in json (--m):  
 dictionary called "manifest":  
@@ -205,19 +230,5 @@ Compulsory:
 &emsp;&emsp;ycol: string to indicate the name of the column of the dataframe containing the class of each sample (if it was prepared with this program if should be "target")  
 
 
-## Program options:  
---j : followed by the json file path with the program configuration (needed for the different options of the program to work correctly)  
-(Options described in order, all of them need to be executed at least once in order to be able to use the next one)  
-&emsp;--m : download manifest from GDC  
-&emsp;--cl : download additional data from GDC  
-&emsp;--dr : run a R script to download data or any other R script wanted by the user
-&emsp;--dl : download slides from a manifest file using the gdc-client program  
-&emsp;--d : to downscale the wsi files  
-&emsp;--jd: it joins the dataframes indicated
-&emsp;--s : to store the images together  
-&emsp;--f : filters the images applying the options indicated  
-&emsp;--c : classifies the images and slits them in train and test sets  
-&emsp;--t : this option is to execute the training and evaluation of the neural network   
-(These next options are optional for the training option):  
-&emsp;--n or --nni : to use nni (it needs to have nni installed)
+
 
